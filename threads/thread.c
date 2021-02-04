@@ -20,6 +20,10 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
+/*lista de threads a la espera de que se cumpla su tiempo 
+de estar durmiendo */
+static struct  list waiting_tsleep; 
+
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
