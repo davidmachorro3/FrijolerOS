@@ -40,7 +40,7 @@ void add_to_waiting_list(int64_t ticks){
   thread_actual->tsleep = timer_ticks() +ticks;
 
   /*
-  Donde TIEMPO_DORMIDO es el atributo de la estructura thread que se definio
+  Donde tsleep es el atributo de la estructura thread que se definio
   */
 
   list_push_back(&waiting_tsleep, &thread_actual->elem);
@@ -48,23 +48,6 @@ void add_to_waiting_list(int64_t ticks){
 
   //Habilitamos interrupciones
   intr_set_level(old_level);
-
-}
-
-
-static void timer_interrupt (struct intr_frame *args UNUSED)
-{
-
-  //No encuentro la variable ticks asi que la creare aqui aunque no afecte en nada
-  int ticks;
-  //----------------
-
-  ticks++;
-  thread_tick ();
-
-  //------------------------------
-  remover_thread_durmiente(ticks);
-  //------------------------------
 
 }
 
@@ -147,7 +130,7 @@ thread_init (void)
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
-  initial_thread->tid = allocate_tid ();
+  initial_thread->tid = allocate_tid (); //<---REVISAR ULTIMAS 3 LINEAS
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -632,3 +615,31 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+//Funcion para remover thread durmiente
+void remover_thread_durmiente(int64_t ticks)
+{
+  //Inicio de la lista de threads dormidos
+  struct list_elem *listaParaIterar = list_begin(&waiting_tsleep);
+
+  //Recorremos la lista de threads dormidos
+  while(listaParaIterar != list_end(&waiting_tsleep)) 
+  {
+    //Obtenemos al thread al que apuntamos actualmente
+    struct thread *threadEnEspera = list_entry(listaParaIterar, struct thread, elem);
+
+    //Vemos si ya paso su tiempo de estar dormido
+    if(ticks >= threadEnEspera->tsleep)
+    {
+      //En caso que si, lo quitamos de la lista y lo despertamos
+      listaParaIterar = list_remove(listaParaIterar);
+      thread_unblock(threadEnEspera);
+    } else 
+    {
+      //De lo contrario, lo dejamos en la lista y apuntamos al siguiente
+      listaParaIterar = list_next(listaParaIterar);
+    }
+
+  }
+
+}

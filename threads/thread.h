@@ -82,7 +82,7 @@ typedef int tid_t;
    semaphore wait list (synch.c).  It can be used these two ways
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
-   blocked state is on a semaphore wait list. */
+   blocked state is on a semaphore wait list. *///
 struct thread
   {
     /* Owned by thread.c. */
@@ -142,5 +142,7 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+
+void remover_thread_durmiente(int64_t ticks);
 
 #endif /* threads/thread.h */
