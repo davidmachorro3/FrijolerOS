@@ -7,6 +7,7 @@
 
 void add_to_waiting_list(int64_t ticks);
 
+
 /* States in a thread's life cycle. */
 enum thread_status
   {

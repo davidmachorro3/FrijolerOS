@@ -23,6 +23,7 @@
 /*lista de threads a la espera de que se cumpla su tiempo
 de estar durmiendo */
 static struct  list waiting_tsleep;//nombre en guia = lista_espera
+static void timer_interrupt (struct intr_frame*);
 
 void add_to_waiting_list(int64_t ticks){
 
@@ -50,6 +51,22 @@ void add_to_waiting_list(int64_t ticks){
 
 }
 
+
+static void timer_interrupt (struct intr_frame *args UNUSED)
+{
+
+  //No encuentro la variable ticks asi que la creare aqui aunque no afecte en nada
+  int ticks;
+  //----------------
+
+  ticks++;
+  thread_tick ();
+
+  //------------------------------
+  remover_thread_durmiente(ticks);
+  //------------------------------
+
+}
 
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
