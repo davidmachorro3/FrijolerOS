@@ -23,6 +23,10 @@
 /*lista de threads a la espera de que se cumpla su tiempo
 de estar durmiendo */
 static struct  list waiting_tsleep;
+void add_to_waiting_list(int64_t ticks){
+  ticks=+0;
+}
+
 
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
