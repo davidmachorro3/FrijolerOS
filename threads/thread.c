@@ -22,9 +22,32 @@
 
 /*lista de threads a la espera de que se cumpla su tiempo
 de estar durmiendo */
-static struct  list waiting_tsleep;
+static struct  list waiting_tsleep;//nombre en guia = lista_espera
+
 void add_to_waiting_list(int64_t ticks){
-  ticks=+0;
+
+  //Deshabilita interrupciones
+  enum intr_level old_level;
+  old_level = intr_disable();
+
+  /*
+  Remover el thread actual de la "ready_list" e insertarlo en la "waiting_list"
+  Camiar su estatus a THREAAD _BLOCKED, y definir su tiempo de expiracion
+  */
+
+  struct thread *thread_actual =thread_current();
+  thread_actual->tsleep = timer_ticks() +ticks;
+
+  /*
+  Donde TIEMPO_DORMIDO es el atributo de la estructura thread que se definio
+  */
+
+  list_push_back(&waiting_tsleep, &thread_actual->elem);
+  thread_block();
+
+  //Habilitamos interrupciones
+  intr_set_level(old_level);
+
 }
 
 
