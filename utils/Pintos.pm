@@ -359,6 +359,13 @@ sub cyl_sectors {
 # Makes sure that the loader is a reasonable size.
 sub read_loader {
   my ($name) = @_;
+  #RUTAS DE CADA UNO, SUSTITUIR EN EL STRING
+  #Jonathan -> /home/jonathan/FrijolerOS/threads/build/loader.bin
+  #Eduardo -> /home/e/FrijolerOS/threads/build/loader.bin
+  #Oswaldo -> /home/student/frijoleros/FrijolerOS/threads/build/loader.bin
+  #Abril -> /home/student/pintos/threads/build/loader.bin
+  #David -> /home/student/FrijolerOS/threads/build/loader.bin
+
   $name = find_file ("../threads/build/loader.bin") if !defined $name;
   die "Cannot find loader\n" if !defined $name;
 

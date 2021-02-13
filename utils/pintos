@@ -263,6 +263,14 @@ sub set_disk {
 # and creates temporary disks.
 sub find_disks {
   # Find kernel, if we don't already have one.
+
+  #RUTAS DE CADA UNO, SUSTITUIR EN EL STRING
+  #Jonathan -> /home/jonathan/FrijolerOS/threads/build/kernel.bin
+  #Eduardo -> /home/e/FrijolerOS/threads/build/kernel.bin
+  #Oswaldo -> /home/student/frijoleros/FrijolerOS/threads/build/kernel.bin
+  #Abril -> /home/student/pintos/threads/build/kernel.bin
+  #David -> /home/student/FrijolerOS/threads/build/kernel.bin
+
   if (!exists $parts{KERNEL}) {
     my $name = find_file ('../threads/build/kernel.bin');
     die "Cannot find kernel\n" if !defined $name;
