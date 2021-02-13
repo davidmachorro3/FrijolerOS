@@ -5,5 +5,3 @@ tags
 *.a
 *.o
 .*.swp
-/utils/pintos
-/utils/Pintos.pm
