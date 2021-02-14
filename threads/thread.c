@@ -369,6 +369,19 @@ void
 thread_set_priority (int new_priority)
 {
   thread_current ()->priority = new_priority;
+
+  /*abril aca poner parte*/
+  while (elemento_actual != list_end(&ready_list))
+  {
+    struct thread *threadActual = list_entry(elemento_actual,struct thread, elem);
+    if(threadActual->priority > max_priority)
+    {
+      max_priority = threadActual->priority;
+    }
+    elemento_actual = list_next(elemento_actual);
+  }
+/*eduardo aca poner parte*/
+
 }
 
 /* Returns the current thread's priority. */
