@@ -371,6 +371,10 @@ thread_set_priority (int new_priority)
   thread_current ()->priority = new_priority;
 
   /*abril aca poner parte*/
+  struct  list_elem *elemento_actual = list_begin(&ready_list);
+  int max_priority = 0;
+  /* ok, :D */ 
+  
   while (elemento_actual != list_end(&ready_list))
   {
     struct thread *threadActual = list_entry(elemento_actual,struct thread, elem);
