@@ -380,7 +380,10 @@ thread_set_priority (int new_priority)
     }
     elemento_actual = list_next(elemento_actual);
   }
-/*eduardo aca poner parte*/
+
+  if(max_priority > thread_current()->priority){
+    thread_yield();
+  }
 
 }
 
