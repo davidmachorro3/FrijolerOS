@@ -397,6 +397,16 @@ thread_set_priority (int new_priority)
 
 }
 
+//Abril lo puso 21/02/2021
+static bool priority_compare(const struct list_elem *a_, const struct list_elem *b_,void *aux UNUSED)
+{
+  const struct thread *a = list_entry (a_, struct thread, elem);
+  const struct thread *b = list_entry (b_, struct thread, elem);
+  
+  return a->priority < b->priority;
+}
+
+
 /* Returns the current thread's priority. */
 int
 thread_get_priority (void)
