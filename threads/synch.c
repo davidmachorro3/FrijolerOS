@@ -200,6 +200,21 @@ void lock_acquire (struct lock *lock)
   {
     //EMPIEZA CODIGO DE JONATHAN
 
+struct list colaDelLock = (lock->semaphore).waiters;
+    struct  list_elem *elemento_actual = list_begin(&colaDelLock);
+    int max_priority = 0;
+  
+    while (elemento_actual != list_end(&colaDelLock))
+    {
+      struct thread *threadIteracion = list_entry(elemento_actual,struct thread, elem);
+      if(threadIteracion->priority > max_priority)
+      {
+        max_priority = threadIteracion->priority;
+      }
+      elemento_actual = list_next(elemento_actual);
+    }
+
+
     //TERMINA CODIGO DE JONATHAN
 
     //EMPIEZA CODIGO DE OSWALDO
