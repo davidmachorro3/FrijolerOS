@@ -366,7 +366,7 @@ sub read_loader {
   #Abril -> /home/student/pintos/threads/build/loader.bin
   #David -> /home/student/FrijolerOS/threads/build/loader.bin
 
-  $name = find_file ("/home/student/frijoleros/FrijolerOS/threads/build/loader.bin") if !defined $name;
+  $name = find_file ("/home/student/FrijolerOS/threads/build/loader.bin") if !defined $name;
   die "Cannot find loader\n" if !defined $name;
 
   my ($handle);

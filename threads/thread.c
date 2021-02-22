@@ -271,6 +271,8 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   list_push_back (&ready_list, &t->elem);
+  list_sort(&ready_list,priority_compare,NULL);
+  //list_reverse(&ready_list);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -341,7 +343,11 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread)
+  {
     list_push_back (&ready_list, &cur->elem);
+    list_sort(&ready_list,priority_compare,NULL);
+    //list_reverse(&ready_list);
+  }
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -403,6 +409,9 @@ void
 thread_set_nice (int nice UNUSED)
 {
   /* Not yet implemented. */
+  thread_current()->nice = nice;
+  //Tener cuidado con la division, luego ver si el thread actual ya no tiene la prioridad mas alta
+  //thread_current()->priority = PRI_MAX - (thread_get_recent_cpu()/4) - (nice*2)
 }
 
 /* Returns the current thread's nice value. */
@@ -410,7 +419,7 @@ int
 thread_get_nice (void)
 {
   /* Not yet implemented. */
-  return 0;
+  return thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
@@ -515,6 +524,9 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  //Inicializar los valores old_priority y touched que sirven para la donacion de prioridades
+  t->old_priority = -1;
+  t->touched = 0;
   t->magic = THREAD_MAGIC;
 
   old_level = intr_disable ();

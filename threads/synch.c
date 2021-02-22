@@ -190,24 +190,28 @@ lock_init (struct lock *lock)
    interrupts disabled, but interrupts will be turned back on if
    we need to sleep. */
 
-int old_priority = 0;
 void lock_acquire (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  if(lock-> holder != NULL && thread_current()-> priority > (lock-> holder) -> priority)
+  if((lock-> holder) != NULL)
   {
-    old_priority = (lock-> holder) -> priority;
-    (lock-> holder) ->priority = thread_current()->priority;
+    //EMPIEZA CODIGO DE JONATHAN
+
+    //TERMINA CODIGO DE JONATHAN
+
+    //EMPIEZA CODIGO DE OSWALDO
+
+    //TERMINA CODIGO DE OSWALDO
   }
 
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
 
-/* Tries to acquires LOCK and returns true if successful or false
+/* Tries to acquire LOCK and returns true if successful or false
    on failure.  The lock must not already be held by the current
    thread.
 
@@ -237,6 +241,8 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+
+  //CODIGO DE EDUARDO
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);

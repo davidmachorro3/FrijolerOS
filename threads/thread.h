@@ -98,6 +98,12 @@ struct thread
 
     uint64_t tsleep; /*tiempo que un thread debe permanecer dormido en guia TIEMPO_DORMIDO*/
 
+    int nice; //Valor nice del thread
+
+    int old_priority;
+
+    int touched;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
