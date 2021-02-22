@@ -261,7 +261,15 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  //CODIGO DE EDUARDO
+  if(lock->holder != NULL)
+  {
+    if(((lock->holder)->old_priority) > 0)
+    {
+      (lock->holder)->priority = (lock->holder)->old_priority;
+      (lock->holder)->old_priority = -1;
+      (lock->holder)->touched;
+    }
+  }
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
