@@ -198,7 +198,6 @@ void lock_acquire (struct lock *lock)
 
   if((lock-> holder) != NULL)
   {
-    //EMPIEZA CODIGO DE JONATHAN
 
 struct list colaDelLock = (lock->semaphore).waiters;
     struct  list_elem *elemento_actual = list_begin(&colaDelLock);
@@ -215,11 +214,16 @@ struct list colaDelLock = (lock->semaphore).waiters;
     }
 
 
-    //TERMINA CODIGO DE JONATHAN
-
-    //EMPIEZA CODIGO DE OSWALDO
-
-    //TERMINA CODIGO DE OSWALDO
+    if(((lock->holder)->priority) < max_priority)
+    {  
+      if(!((lock->holder)->touched)) 
+      {
+        (lock->holder)->old_priority = (lock->holder)->priority;
+      }
+      (lock->holder)->priority = max_priority;
+      (lock->holder)->touched = 1;
+    }
+    
   }
 
   sema_down (&lock->semaphore);
