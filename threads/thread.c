@@ -25,6 +25,17 @@ de estar durmiendo */
 static struct  list waiting_tsleep;//nombre en guia = lista_espera
 static void timer_interrupt (struct intr_frame*);
 
+
+//Abril lo puso 28/02/2021
+static bool priority_compare(const struct list_elem *a_, const struct list_elem *b_,void *aux UNUSED)
+{
+  const struct thread *a = list_entry (a_, struct thread, elem);
+  const struct thread *b = list_entry (b_, struct thread, elem);
+  
+  return a->priority < b->priority;
+}
+
+
 void add_to_waiting_list(int64_t ticks){
 
   //Deshabilita interrupciones
@@ -234,6 +245,10 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  if (t->priority > thread_current()->priority){
+    thread_yield();
+  }
+
   return tid;
 }
 
@@ -395,15 +410,6 @@ thread_set_priority (int new_priority)
     thread_yield();
   }
 
-}
-
-//Abril lo puso 21/02/2021
-static bool priority_compare(const struct list_elem *a_, const struct list_elem *b_,void *aux UNUSED)
-{
-  const struct thread *a = list_entry (a_, struct thread, elem);
-  const struct thread *b = list_entry (b_, struct thread, elem);
-  
-  return a->priority < b->priority;
 }
 
 
