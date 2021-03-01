@@ -132,10 +132,15 @@ sema_up (struct semaphore *sema)
     list_sort(&sema->waiters,priority_compare,NULL);
     hilo = list_entry (list_pop_front (&sema->waiters),struct thread, elem);
     //OSWALDO THREAD UNBLOCK
+    thread_unblock(hilo); 
   } 
   sema->value++;
   intr_set_level (old_level);
   //OSWALDO IF YIELD
+  if(hilo != NULL && hilo->priority > thread_current() -> priority)
+  {
+    thread_yield();
+  }
 }
 
 static void sema_test_helper (void *sema_);
