@@ -40,7 +40,7 @@ static bool priority_compare(const struct list_elem *a_, const struct list_elem 
   const struct thread *a = list_entry (a_, struct thread, elem);
   const struct thread *b = list_entry (b_, struct thread, elem);
   
-  return a->priority < b->priority;
+  return a->priority > b->priority;
 }
 
 
@@ -381,7 +381,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
 
   if (!list_empty (&cond->waiters))
   {
-    list_sort(&cond->waiters.priority_compare, NULL);
+    list_sort(&cond->waiters,priority_compare, NULL);
     sema_up (&list_entry (list_pop_front (&cond->waiters),
                           struct semaphore_elem, elem)->semaphore);
   }
