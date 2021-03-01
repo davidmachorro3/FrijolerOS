@@ -212,11 +212,11 @@ void lock_acquire (struct lock *lock)
   if((lock-> holder) != NULL)
   {
 
-struct list colaDelLock = (lock->semaphore).waiters;
-    struct  list_elem *elemento_actual = list_begin(&colaDelLock);
-    int max_priority = 0;
+    struct list *colaDelLock = &((lock->semaphore).waiters);
+    struct  list_elem *elemento_actual = list_begin(colaDelLock);
+    int max_priority = thread_current()->priority;
   
-    while (elemento_actual != list_end(&colaDelLock))
+    while (elemento_actual != list_end(colaDelLock))
     {
       struct thread *threadIteracion = list_entry(elemento_actual,struct thread, elem);
       if(threadIteracion->priority > max_priority)
@@ -369,9 +369,12 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
 
-  if (!list_empty (&cond->waiters)) 
+  if (!list_empty (&cond->waiters))
+  {
+    list_sort(&cond->waiters.priority_compare, NULL);
     sema_up (&list_entry (list_pop_front (&cond->waiters),
                           struct semaphore_elem, elem)->semaphore);
+  }
 }
 
 /* Wakes up all threads, if any, waiting on COND (protected by
