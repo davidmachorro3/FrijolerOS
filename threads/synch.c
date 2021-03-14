@@ -239,10 +239,7 @@ void lock_acquire (struct lock *lock)
 
     if(((lock->holder)->priority) < max_priority)
     {  
-      if(!((lock->holder)->touched)) 
-      {
-        (lock->holder)->old_priority = (lock->holder)->priority;
-      }
+      (lock->holder)->old_priority = (lock->holder)->priority;
       (lock->holder)->priority = max_priority;
       (lock->holder)->touched = 1;
     }
@@ -286,7 +283,7 @@ lock_release (struct lock *lock)
 
   if(lock->holder != NULL)
   {
-    if(((lock->holder)->old_priority) > 0)
+    if(((lock->holder)->old_priority) >= 0)
     {
       (lock->holder)->priority = (lock->holder)->old_priority;
       (lock->holder)->old_priority = -1;
@@ -382,6 +379,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   if (!list_empty (&cond->waiters))
   {
     list_sort(&cond->waiters,priority_compare, NULL);
+    list_reverse(&cond->waiters);
     sema_up (&list_entry (list_pop_front (&cond->waiters),
                           struct semaphore_elem, elem)->semaphore);
   }

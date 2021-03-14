@@ -38,6 +38,10 @@ static bool priority_compare(const struct list_elem *a_, const struct list_elem 
 
 void add_to_waiting_list(int64_t ticks){
 
+  //Si ticks es negativo, el thread sale instantaneamente de waiting list
+  if(ticks < 0) ticks = 0;
+
+
   //Deshabilita interrupciones
   enum intr_level old_level;
   old_level = intr_disable();

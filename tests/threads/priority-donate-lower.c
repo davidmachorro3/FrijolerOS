@@ -39,6 +39,7 @@ test_priority_donate_lower (void)
        PRI_DEFAULT - 10, thread_get_priority ());
 }
 
+
 static void
 acquire_thread_func (void *lock_) 
 {
