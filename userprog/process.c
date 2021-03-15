@@ -452,16 +452,13 @@ setup_stack (void **esp, const char *file_name)
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
         *esp = PHYS_BASE - 12;
-        
-
-
         args = malloc(strlen(file_name)+1);
         strlcpy(args, file_name, strlen(file_name)+1);
         while ((arg[i] = strtok_r(args, " ", &temp))) {
           i++;
         }
         free(args);
-      else
+      }else
         palloc_free_page (kpage);
     }
   return success;
