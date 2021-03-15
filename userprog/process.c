@@ -204,7 +204,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, const char *file_name);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -311,7 +311,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp, file_name))
     goto done;
 
   /* Start address. */
@@ -441,6 +441,8 @@ setup_stack (void **esp, const char *file_name)
   uint8_t *kpage;
   char *args;
   char *temp;
+  char *arg[10];
+
   int i = 0;
   bool success = false;
 
@@ -448,12 +450,17 @@ setup_stack (void **esp, const char *file_name)
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
-        *esp = PHYS_BASE;
+      if (success){
+        *esp = PHYS_BASE - 12;
+        
+
 
         args = malloc(strlen(file_name)+1);
-        strcpy(args, file_name, strlen(file_name)+1);
-
+        strlcpy(args, file_name, strlen(file_name)+1);
+        while ((arg[i] = strtok_r(args, " ", &temp))) {
+          i++;
+        }
+        free(args);
       else
         palloc_free_page (kpage);
     }
