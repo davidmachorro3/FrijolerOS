@@ -31,8 +31,12 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
+  char *name;
+  char *temp;
 
   name = malloc(strlen(file_name) + 1);
+  strlcpy(name, file_name, strlen(file_name)+1);
+  name = strtok_r(name, " ", &temp);
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
