@@ -447,9 +447,17 @@ setup_stack (void **esp, const char *file_name)
   char *args;
   char *temp;
   char *arg[10];
-
-  int i = 0;
   bool success = false;
+  int i = 0;
+
+  int argn = -1;
+  args = malloc(strlen(file_name)+1);
+  strlcpy(args, file_name, strlen(file_name) + 1);
+  char* argv[10];
+  char *rest = args;
+
+  //WHILE Y FREE(ARGS)
+  
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
