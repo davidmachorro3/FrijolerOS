@@ -452,18 +452,27 @@ setup_stack (void **esp, const char *file_name)
   bool success = false;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+
   if (kpage != NULL) 
     {
+
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success){
+
+      if (success)
+      {
         *esp = PHYS_BASE - 12;
-        args = malloc(strlen(file_name)+1);
-        strlcpy(args, file_name, strlen(file_name)+1);
-        while ((arg[i] = strtok_r(args, " ", &temp))) {
-          i++;
+
+        for(int i = 0; i <= argn; i++)
+        {
+
+          *esp = *esp -strlen(argv[1])
+          memcpy(&esp, argv[argn -i], strlen(argv[argn -i]));
+
         }
-        free(args);
-      }else
+        
+      }
+      
+      else
         palloc_free_page (kpage);
     }
   return success;
