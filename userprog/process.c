@@ -458,7 +458,12 @@ setup_stack (void **esp, const char *file_name)
   char *rest = args;
 
   //WHILE Y FREE(ARGS)
-  
+  while((argv[i]=strok_r(rest, " ", &rest)))
+  {
+    argn++;
+    i++;
+  }
+  free(args);
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 

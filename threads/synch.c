@@ -81,9 +81,10 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      list_insert_ordered (&sema->waiters, &thread_current ()->elem, priority_compare, NULL);
       thread_block ();
     }
+
   sema->value--;
   intr_set_level (old_level);
 }
@@ -219,13 +220,15 @@ void lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+  enum intr_level old_level = intr_disable();
+
   if((lock-> holder) != NULL)
   {
 
     struct list *colaDelLock = &((lock->semaphore).waiters);
     struct  list_elem *elemento_actual = list_begin(colaDelLock);
     int max_priority = thread_current()->priority;
-  
+
     while (elemento_actual != list_end(colaDelLock))
     {
       struct thread *threadIteracion = list_entry(elemento_actual,struct thread, elem);
@@ -235,19 +238,23 @@ void lock_acquire (struct lock *lock)
       }
       elemento_actual = list_next(elemento_actual);
     }
-
-
+    
     if(((lock->holder)->priority) < max_priority)
     {  
+      //msg("Antes \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
       (lock->holder)->old_priority = (lock->holder)->priority;
       (lock->holder)->priority = max_priority;
       (lock->holder)->touched = 1;
+      //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
+      
     }
-    
+    //msg("\nSemaforo %d\n", (lock->semaphore).value);
   }
-
+  
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+  //msg("\nHolde: %s", (lock->holder)->name);
+  intr_set_level(old_level);
 }
 
 /* Tries to acquire LOCK and returns true if successful or false
@@ -281,8 +288,13 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+  enum intr_level old_level = intr_disable();
+  
+  //msg("\n--------Current\nSoy %s\n", thread_current()->name);
+  //msg("\nRelease \n%s: old: %d, new: %d\n",thread_current()->name, thread_current()->old_priority, thread_current()->priority);
   if(lock->holder != NULL)
   {
+    //msg("\n-------Holder\nSoy %s\n", (lock->holder)->name);
     if(((lock->holder)->old_priority) >= 0)
     {
       (lock->holder)->priority = (lock->holder)->old_priority;
@@ -290,9 +302,10 @@ lock_release (struct lock *lock)
       (lock->holder)->touched = 0;
     }
   }
-
+  intr_set_level(old_level);
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  
 }
 
 /* Returns true if the current thread holds LOCK, false

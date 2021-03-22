@@ -59,6 +59,7 @@ void add_to_waiting_list(int64_t ticks){
   */
 
   list_push_back(&waiting_tsleep, &thread_actual->elem);
+  list_sort(&waiting_tsleep, priority_compare, NULL);
   thread_block();
 
   //Habilitamos interrupciones
@@ -221,6 +222,7 @@ thread_create (const char *name, int priority,
   tid_t tid;
 
   ASSERT (function != NULL);
+
 
   /* Allocate thread. */
   t = palloc_get_page (PAL_ZERO);
@@ -393,6 +395,7 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority)
 {
+  thread_current ()->old_priority = thread_current ()->priority;
   thread_current ()->priority = new_priority;
 
   /*abril aca poner parte*/
@@ -551,6 +554,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
+  list_sort(&all_list, priority_compare, NULL);
   intr_set_level (old_level);
 }
 
@@ -577,8 +581,9 @@ next_thread_to_run (void)
 {
   if (list_empty (&ready_list))
     return idle_thread;
-  else
+  else{
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
+  }
 }
 
 /* Completes a thread switch by activating the new thread's page
