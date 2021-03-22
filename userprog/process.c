@@ -223,7 +223,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
+  char *name;
+  char *temp;
 
+  name = malloc(strlen(file_name)+1);
+  strlcpy(name, file_name, strlen(file_name)+1);
+  name = strtok_r(name, " " ,&temp);
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
