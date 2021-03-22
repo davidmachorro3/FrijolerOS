@@ -449,11 +449,12 @@ setup_stack (void **esp, const char *file_name)
   char *arg[10];
   bool success = false;
   int i = 0;
-
+  int charsize = sizeof(char);
   int argn = -1;
   args = malloc(strlen(file_name)+1);
   strlcpy(args, file_name, strlen(file_name) + 1);
   char* argv[10];
+  char* argvmem[10];
   char *rest = args;
 
   //WHILE Y FREE(ARGS)
@@ -473,11 +474,15 @@ setup_stack (void **esp, const char *file_name)
         for(int i = 0; i <= argn; i++)
         {
 
-          *esp = *esp -strlen(argv[1])
-          memcpy(&esp, argv[argn -i], strlen(argv[argn -i]));
+          *esp = *esp -strlen(argv[1])*charsize;
+          memcpy(&esp, argv[argn -i], strlen(argv[argn -i])*charsize);
+	  argvmem[i] = &argv[argn-i];
 
         }
-        
+         *esp = *esp -strlen(argv[1])*charsize
+	*esp -= (*esp % 4)
+	
+	        
       }
       
       else
