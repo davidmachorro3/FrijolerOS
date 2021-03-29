@@ -306,8 +306,9 @@ lock_release (struct lock *lock)
   
   //msg("\n--------Current\nSoy %s\n", thread_current()->name);
   //msg("\nRelease \n%s: old: %d, new: %d\n",thread_current()->name, thread_current()->old_priority, thread_current()->priority);
-  if(lock->holder != NULL)
+  if(lock->holder != NULL && list_size(&((lock->holder)->old_priority_list)) > 0)
   {
+    /*
     //msg("\n-------Holder\nSoy %s\n", (lock->holder)->name);
     if(((lock->holder)->old_priority) >= 0)
     {
@@ -315,7 +316,26 @@ lock_release (struct lock *lock)
       (lock->holder)->old_priority = -1;
       (lock->holder)->touched = 0;
     }
+    */
+    struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
+    struct old_priority *actual_old;
+    int found = 0 ;
+    while(actual_elem != list_end(&((lock->holder)->old_priority_list))){
+      actual_old = list_entry(actual_elem, struct old_priority, elem);
+      if(actual_old->lock == lock){
+        found = 1;
+        break;
+      }
+      actual_elem = list_next(actual_elem);
+    }
+    //msg("\n-+%d-\n", actual_old->lock);
+    if(found){
+      (lock->holder)->priority = actual_old->old_pr;
+      list_remove(&(actual_old->elem));
+      free(actual_old);
+    }
   }
+
   intr_set_level(old_level);
   lock->holder = NULL;
   sema_up (&lock->semaphore);
