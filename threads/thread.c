@@ -552,6 +552,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->touched = 0;
   t->magic = THREAD_MAGIC;
 
+  list_init(&(t->old_priority_list));
+
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
   list_sort(&all_list, priority_compare, NULL);
