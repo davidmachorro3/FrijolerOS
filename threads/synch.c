@@ -240,13 +240,27 @@ void lock_acquire (struct lock *lock)
     }
     
     if(((lock->holder)->priority) < max_priority)
-    {  
+    { 
+      /* 
       //msg("Antes \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
       (lock->holder)->old_priority = (lock->holder)->priority;
       (lock->holder)->priority = max_priority;
       (lock->holder)->touched = 1;
       //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
-      
+      */
+
+      struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
+      int found = 0;
+      struct old_priority *actual_old;
+
+      while(actual_elem != list_end(&((lock->holder)->old_priority_list))) {
+        actual_old = list_entry(actual_elem, struct old_priority, elem);
+        if(actual_old->lock == lock) {
+          found = 1;
+          break;
+        }
+        actual_elem = list_next(actual_elem);
+      }
     }
     //msg("\nSemaforo %d\n", (lock->semaphore).value);
   }
