@@ -249,6 +249,8 @@ void lock_acquire (struct lock *lock)
       //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
       */
 
+      //verificamos de que el thread que hace el acquire hace el lock y si no =>
+      //agregamos el lock con su old priority 
       struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
       int found = 0;
       struct old_priority *actual_old;
@@ -317,22 +319,25 @@ lock_release (struct lock *lock)
       (lock->holder)->touched = 0;
     }
     */
+
+    //verificamos que, el que hace el release si sea el lock_holder
+    //y si lo encontramos restauramos la prioridad y restauramos la memoria
     struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
-    struct old_priority *actual_old;
-    int found = 0 ;
+    struct old_priority *actual_old_priority;
+    int encontrado = 0 ;
     while(actual_elem != list_end(&((lock->holder)->old_priority_list))){
-      actual_old = list_entry(actual_elem, struct old_priority, elem);
-      if(actual_old->lock == lock){
-        found = 1;
+      actual_old_priority = list_entry(actual_elem, struct old_priority, elem);
+      if(actual_old_priority->lock == lock){
+        encontrado = 1;
         break;
       }
       actual_elem = list_next(actual_elem);
     }
     //msg("\n-+%d-\n", actual_old->lock);
-    if(found){
-      (lock->holder)->priority = actual_old->old_pr;
-      list_remove(&(actual_old->elem));
-      free(actual_old);
+    if(encontrado){
+      (lock->holder)->priority = actual_old_priority->old_pr;
+      list_remove(&(actual_old_priority->elem));
+      free(actual_old_priority);
     }
   }
 
