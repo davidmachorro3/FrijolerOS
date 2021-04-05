@@ -444,25 +444,23 @@ static bool
 setup_stack (void **esp, const char *file_name) 
 {
   uint8_t *kpage;
-  char *args;
-  char *temp;
-  char *arg[10];
   bool success = false;
-  int i = 0;
-  int charsize = sizeof(char);
-  int argn = -1;
-  args = malloc(strlen(file_name)+1);
+  char *args;
+  char *token;
+  int argn = 0; //numero de argumentos
+  int charsize = sizeof(char *);
+  args = malloc(strlen(file_name) + 1);
+  int arglen;
   strlcpy(args, file_name, strlen(file_name) + 1);
-  char* argv[10];
-  char* argvmem[10];
-  char *rest = args;
+  char *argv[10];
 
-  //WHILE Y FREE(ARGS)
-  while((argv[i]=strok_r(rest, " ", &rest)))
-  {
+  char *rest = args;
+  while ((token = strtok_r(file_name, " ", &rest)) != NULL)
+  {  
+    argv[argn] = token;
     argn++;
-    i++;
   }
+  int* argmem[argn];
   free(args);
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
