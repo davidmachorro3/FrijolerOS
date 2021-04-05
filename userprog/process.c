@@ -481,11 +481,22 @@ setup_stack (void **esp, const char *file_name)
 
           *esp = (strlen(argv[i-1])+1)*charsize;
           memcpy(*esp, argv[i-1], (strlen(argv[i-1])+1)*charsize);
-	  argvmem[i-1] = (int *)*esp;
+	        argvmem[i-1] = (int *)*esp;
 
         }
-         *esp = *esp -strlen(argv[1])*charsize
-	*esp -= (*esp % 4)
+        
+        /*
+        ---- Esto los comente, no se que tan irtante era ---
+        *esp = *esp -strlen(argv[1])*charsize
+        *esp -= (*esp % 4)
+        */
+
+       *esp -= (int)*esp % 4;
+       *esp = *esp - 4;
+       for(int i = argn; i > 1; i--){
+         *esp -= sizeof(char*);
+         memcpy(*esp, argvmem[i-1], sizeof(char*));
+       }
 	
 	        
       }
