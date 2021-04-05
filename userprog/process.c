@@ -479,9 +479,9 @@ setup_stack (void **esp, const char *file_name)
         for(int i = 0; i <= argn; i++)
         {
 
-          *esp = *esp -strlen(argv[1])*charsize;
-          memcpy(&esp, argv[argn -i], strlen(argv[argn -i])*charsize);
-	  argvmem[i] = &argv[argn-i];
+          *esp = (strlen(argv[i-1])+1)*charsize;
+          memcpy(*esp, argv[i-1], (strlen(argv[i-1])+1)*charsize);
+	  argvmem[i-1] = (int *)*esp;
 
         }
          *esp = *esp -strlen(argv[1])*charsize
