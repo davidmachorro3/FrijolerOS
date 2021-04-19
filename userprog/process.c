@@ -441,7 +441,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp, const char *file_name) 
+setup_stack(void **esp, const char *file_name)
 {
   uint8_t *kpage;
   bool success = false;
@@ -455,58 +455,47 @@ setup_stack (void **esp, const char *file_name)
   char *argv[10];
 
   char *rest = args;
-  while ((token = strtok_r(file_name, " ", &rest)) != NULL)
+  //obtener todos los argumentos y guardarlos en argv[]
+  while ((token = strtok_r(rest, " ", &rest)) != NULL)
   {  
     argv[argn] = token;
     argn++;
   }
-  int* argmem[argn];
+  void* argmem[argn]; //arreglo de posiciones de memoria de argumetos
   free(args);
 
-  kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-
-  if (kpage != NULL) 
+  kpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  if (kpage != NULL)
+  {
+    success = install_page(((uint8_t *)PHYS_BASE) - PGSIZE, kpage, true);
+    if (success)
     {
-
-      success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-
-      if (success)
-      {
-        *esp = PHYS_BASE - 12;
-
-        for(int i = 0; i <= argn; i++)
+      *esp = PHYS_BASE-12;
+      printf("%d\n", (int)esp);
+      for(int i = argn; i > 0; i--)
         {
-
-          *esp = (strlen(argv[i-1])+1)*charsize;
-          memcpy(*esp, argv[i-1], (strlen(argv[i-1])+1)*charsize);
-	        argvmem[i-1] = (int *)*esp;
-
+          *esp = *esp - (strlen(argv[i-1])+2) * charsize;
+          memcpy(*esp, (void * )strlcat(argv[i-1], "\0", (strlen(argv[i-1])+2) * charsize), (strlen(argv[i-1])+2) * charsize);  // push arg a stack
+          argmem[i-1] = (int *)*esp;  //guardar stack pointer actual/posicion de arg en stack
         }
-        
-        /*
-        ---- Esto los comente, no se que tan irtante era ---
-        *esp = *esp -strlen(argv[1])*charsize
-        *esp -= (*esp % 4)
-        */
 
-       *esp -= (int)*esp % 4;
-       *esp = *esp - 4;
-       for(int i = argn; i > 1; i--){
-         *esp -= sizeof(char*);
-         memcpy(*esp, argvmem[i-1], sizeof(char*));
-       }
+        *esp -= (int)*esp % 4; 
+        *esp = *esp - 4;
+        for(int i = argn; i > 1; i--)
 
-        *esp -= sizeof(char *);
-        memcpy(*esp, argmem[i-1], sizeof(char *));
-	
-	*esp -= sizeof(int *);
-	memcpy(*esp, argn, sizeof(int *));
-	      
-      }
-      
-      else
-        palloc_free_page (kpage);
+        {
+          *esp -= sizeof(char*);
+          memcpy(*esp, argmem[i-1], sizeof(char*));
+        }
+
+       *esp -= sizeof(char**);
+       memcpy(*esp, argmem[0], sizeof(char**));
+    
+
     }
+    else
+      palloc_free_page(kpage);
+  }
   return success;
 }
 
