@@ -490,7 +490,9 @@ setup_stack(void **esp, const char *file_name)
 
        *esp -= sizeof(char**);
        memcpy(*esp, argmem[0], sizeof(char**));
-    
+        
+       *esp -= sizeof(int);
+        
 
     }
     else
