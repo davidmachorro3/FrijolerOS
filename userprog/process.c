@@ -494,6 +494,8 @@ setup_stack(void **esp, const char *file_name)
        *esp -= sizeof(int);
        memcpy(*esp, argn, sizeof(int)); 
 
+       *esp -= sizeof(void*);
+
     }
     else
       palloc_free_page(kpage);
