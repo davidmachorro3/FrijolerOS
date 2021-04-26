@@ -31,6 +31,7 @@
 #include <string.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include <string.h>
 
 
 
@@ -87,6 +88,7 @@ sema_down (struct semaphore *sema)
 
   sema->value--;
   intr_set_level (old_level);
+  
 }
 
 /* Down or "P" operation on a semaphore, but only if the
@@ -133,12 +135,16 @@ sema_up (struct semaphore *sema)
     list_sort(&sema->waiters,priority_compare,NULL);
     hilo = list_entry (list_pop_front (&sema->waiters),struct thread, elem);
     //OSWALDO THREAD UNBLOCK
+    
+    //msg("hilo: %s\n", hilo->name);
+
     thread_unblock(hilo); 
   } 
   sema->value++;
   intr_set_level (old_level);
   //OSWALDO IF YIELD
-  if(hilo != NULL && hilo->priority > thread_current() -> priority)
+
+  if(hilo != NULL && hilo->priority > thread_current()->priority)
   {
     thread_yield();
   }
@@ -269,6 +275,7 @@ void lock_acquire (struct lock *lock)
         //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, new_old->old_pr, max_priority);
       }
 
+
       (lock->holder)->priority = max_priority;
     }
     //msg("\nSemaforo %d\n", (lock->semaphore).value);
@@ -313,12 +320,22 @@ lock_release (struct lock *lock)
 
   enum intr_level old_level = intr_disable();
   
+  struct old_priority *actual_old;
+  int found = 0 ;
+  int mayor = 0;
+  char *name = "main";
+  char *name2 = (lock->holder)->name;
   //msg("\n--------Current\nSoy %s\n", thread_current()->name);
   //msg("\nRelease \n%s: old: %d, new: %d\n",thread_current()->name, thread_current()->old_priority, thread_current()->priority);
+  if(!strcmp(name, name2) && (lock == -1073505144) && 0){
+    msg("Holder: %s, pri: %d, lock: %d", thread_current()->name, (lock->holder)->priority,lock);
+  }
   if(lock->holder != NULL && list_size(&((lock->holder)->old_priority_list)) > 0)
   {
-    /*
+
     //msg("\n-------Holder\nSoy %s\n", (lock->holder)->name);
+    /*
+    
     if(((lock->holder)->old_priority) >= 0)
     {
       (lock->holder)->priority = (lock->holder)->old_priority;
@@ -327,8 +344,6 @@ lock_release (struct lock *lock)
     }
     */
     struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
-    struct old_priority *actual_old;
-    int found = 0 ;
     while(actual_elem != list_end(&((lock->holder)->old_priority_list))){
       actual_old = list_entry(actual_elem, struct old_priority, elem);
       if(actual_old->lock == lock){
@@ -337,12 +352,45 @@ lock_release (struct lock *lock)
       }
       actual_elem = list_next(actual_elem);
     }
+
+
+    struct old_priority *bigger_old;
+    struct old_priority *temp_old; 
+    actual_elem = list_begin(&((lock->holder)->old_priority_list));
+    while(found && actual_elem != list_end(&((lock->holder)->old_priority_list))){
+      temp_old = list_entry(actual_elem, struct old_priority, elem);
+      if(actual_old->old_pr < temp_old->old_pr && bigger_old->old_pr > actual_old->old_pr){
+        if((bigger_old->old_pr - actual_old->old_pr) > (temp_old->old_pr - actual_old->old_pr)){
+          bigger_old = temp_old;
+          mayor = 1;
+        }
+      }
+      actual_elem = list_next(actual_elem);
+    }
     //msg("\n-+%d-\n", actual_old->lock);
+    if(found && !mayor){
+      //msg("holder of %d: %s, pri: %d, new: %d\n", lock,(lock->holder)->name, (lock->holder)->priority, actual_old->old_pr);
+      (lock->holder)->priority = actual_old->old_pr;
+      list_remove(&(actual_old->elem));
+      free(actual_old);
+    }else if(found && mayor){
+      //(lock->holder)->priority = actual_old_priority->old_pr;
+      //msg("holder of %d: %s, pri: %d, new: %d\n", lock,(lock->holder)->name, bigger_old->old_pr, actual_old->old_pr);
+      bigger_old->old_pr = actual_old->old_pr;
+      list_remove(&(actual_old->elem));
+      free(actual_old);
+    }
+
+    
+    //msg("\n-+%d-\n", actual_old->lock);
+    /*
     if(found){
       (lock->holder)->priority = actual_old->old_pr;
       list_remove(&(actual_old->elem));
       free(actual_old);
     }
+    */
+
   }
 
   intr_set_level(old_level);
