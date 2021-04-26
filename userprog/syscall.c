@@ -16,5 +16,10 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
   printf ("system call!\n");
-  thread_exit ();
+
+  //Obtener el codigo de la syscall
+
+  int sys_code = *(int *)f->esp;
+
+  //Verificar que el codigo sea valido
 }
