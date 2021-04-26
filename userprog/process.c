@@ -474,31 +474,16 @@ setup_stack(void **esp, const char *file_name)
     success = install_page(((uint8_t *)PHYS_BASE) - PGSIZE, kpage, true);
     if (success)
     {
-      *esp = PHYS_BASE-12;
-      printf("%d\n", (int)esp);
+      *esp = PHYS_BASE;
+      //printf("%d\n", (int)esp);
       for(int i = argn; i > 0; i--)
         {
-          *esp = *esp - (strlen(argv[i-1])+2) * charsize;
-          memcpy(*esp, (void * )strlcat(argv[i-1], "\0", (strlen(argv[i-1])+2) * charsize), (strlen(argv[i-1])+2) * charsize);  // push arg a stack
-          argmem[i-1] = (int *)*esp;  //guardar stack pointer actual/posicion de arg en stack
+          arg = strlcat(argv[i-1], "\0", strlen(argv[i-1]) + strlen("\0") + 1);
+          *esp -= strlen(arg);
+          memcpy(*esp, (void *)arg, strlen(arg));  // push arg a stack
+          argmem[i-1] = (void *)*esp;  //guardar stack pointer actual/posicion de arg en stack
         }
-
-        *esp -= (int)*esp % 4; 
-        *esp = *esp - 4;
-        for(int i = argn; i > 1; i--)
-
-        {
-          *esp -= sizeof(char*);
-          memcpy(*esp, argmem[i-1], sizeof(char*));
-        }
-
-       *esp -= sizeof(char**);
-       memcpy(*esp, argmem[0], sizeof(char**));
-        
-       *esp -= sizeof(int);
-       memcpy(*esp, argn, sizeof(int)); 
-
-       *esp -= sizeof(void*);
+        //Alinear la memoria
 
     }
     else
