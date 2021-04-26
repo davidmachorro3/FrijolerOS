@@ -46,7 +46,7 @@ process_execute (const char *file_name)
   strlcpy (fn_copy, file_name, PGSIZE);
 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
 
@@ -97,6 +97,9 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  while(1) {
+    thread_yield();
+  }
   return -1;
 }
 
@@ -236,10 +239,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
-  file = filesys_open (file_name);
+  file = filesys_open (name);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", file_name);
+      printf ("load: %s: open failed\n", name);
       goto done; 
     }
 
@@ -252,7 +255,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", file_name);
+      printf ("load: %s: error loading executable\n", name);
       goto done; 
     }
 
@@ -453,10 +456,11 @@ setup_stack(void **esp, const char *file_name)
   int arglen;
   strlcpy(args, file_name, strlen(file_name) + 1);
   char *argv[10];
+  char *temp;
+  char *arg;
 
-  char *rest = args;
   //obtener todos los argumentos y guardarlos en argv[]
-  while ((token = strtok_r(rest, " ", &rest)) != NULL)
+  while ((token = strtok_r(args, " ", &temp)) != NULL)
   {  
     argv[argn] = token;
     argn++;
