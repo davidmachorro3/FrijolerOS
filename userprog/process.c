@@ -483,8 +483,33 @@ setup_stack(void **esp, const char *file_name)
           memcpy(*esp, (void *)arg, strlen(arg));  // push arg a stack
           argmem[i-1] = (void *)*esp;  //guardar stack pointer actual/posicion de arg en stack
         }
+        
         //Alinear la memoria
 
+        int word_align = (int)*esp % 4;
+        *esp -= word_align;
+        memset(*esp, 0, word_align);
+
+        //Ultimo argumento
+        *esp = *esp - 4;
+        memset(*esp, 0, 4);
+
+        for(int i = argn; i > 1; i--)
+
+        {
+          *esp -= sizeof(char*);
+          memcpy(*esp, &argmem[i-1], sizeof(char*));
+        }
+
+       *esp -= sizeof(char**);
+       memcpy(*esp, &argmem[0], sizeof(char**));
+        
+       *esp -= sizeof(int);
+       memcpy(*esp, &argn, sizeof(int)); 
+
+       *esp -= sizeof(void *);
+       void *null_pointer = NULL;
+       memcpy(*esp, &null_pointer, sizeof(void *));
     }
     else
       palloc_free_page(kpage);
