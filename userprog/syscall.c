@@ -120,10 +120,16 @@ syscall_handler (struct intr_frame *f UNUSED)
 
   int sys_code = *(int *)f->esp;
 
-  switch(sys_code) {
+  switch(sys_code) 
+  {
     case SYS_HALT:
+    {
+      halt();
       break;
-    case SYS_EXIT: {
+    }
+      
+    case SYS_EXIT: 
+    {
       // Leer parametro status y llamar a funcion
 
       int status = *((int*)f->esp + 1);
@@ -133,20 +139,48 @@ syscall_handler (struct intr_frame *f UNUSED)
       break;
     }
     case SYS_EXEC:
+    {
+      char *cmd_line = (char *)(*((int*)f->esp + 1));
+      
+
+      //Pendiente de implementar
       break;
+    }
     case SYS_WAIT:
+    {
+      pid_t pid = (pid_t)(*((int*)f->esp + 1));
       break;
+    }
     case SYS_CREATE:
+    {
+      char *file = (char *)(*((int*)f->esp + 1));
+      unsigned initial_size = *((unsigned *)f->esp + 2);
       break;
+    }
     case SYS_REMOVE:
+    {
+      char *file = (char *)(*((int*)f->esp + 1));
       break;
+    }
     case SYS_OPEN:
+    {
+      char *file = (char *)(*((int*)f->esp + 1));
       break;
+    }
     case SYS_FILESIZE:
+    {
+      int fd = *((int*)f->esp + 1);
       break;
+    }
     case SYS_READ:
+    {
+      int fd = *((int*)f->esp + 1);
+      void* buffer = (void*)(*((int*)f->esp + 2));
+      unsigned size = *((unsigned*)f->esp + 3);
       break;
-    case SYS_WRITE: {
+    }
+    case SYS_WRITE: 
+    {
 
       //Obtener parametros para write
 
@@ -161,11 +195,21 @@ syscall_handler (struct intr_frame *f UNUSED)
       break;
     }
     case SYS_SEEK:
+    {
+      int fd = *((int*)f->esp + 1);
+      unsigned position = *((unsigned*)f->esp + 2);
       break;
+    }
     case SYS_TELL:
+    {
+      int fd = *((int*)f->esp + 1);
       break;
+    }
     case SYS_CLOSE:
+    {
+      int fd = *((int*)f->esp + 1);
       break;
+    }
   }
 
 }
