@@ -5,6 +5,22 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "userprog/pagedir.h"
+#include "lib/user/syscall.h"
+#include "threads/init.h"
+#include "filesys/filesys.h"
+#include "filesys/file.h"
+
+void halt (void) {
+  //Terminar PintoS
+
+  //Revisar esta funcion (no esta en init.h)
+
+  shutdown_power_off();
+}
+
+
+
+
 
 void exit (int status) {
   //Ver que mas hay que hacer aqui
