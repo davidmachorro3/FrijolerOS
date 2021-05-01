@@ -87,7 +87,9 @@ sema_down (struct semaphore *sema)
     }
 
   sema->value--;
+  
   intr_set_level (old_level);
+  
   
 }
 
@@ -127,17 +129,18 @@ sema_up (struct semaphore *sema)
   enum intr_level old_level;
 
   ASSERT (sema != NULL);
-
+  
   old_level = intr_disable ();
   struct thread *hilo;
   if (!list_empty (&sema->waiters))
   {
     list_sort(&sema->waiters,priority_compare,NULL);
+    //msg("- %d -", list_size(&sema->waiters));
     hilo = list_entry (list_pop_front (&sema->waiters),struct thread, elem);
     //OSWALDO THREAD UNBLOCK
+    //msg("current: %s, pri: %d", thread_current()->name, thread_current()->priority);
+    //msg("hilo: %s, pri: %d\n", hilo->name, hilo->priority);
     
-    //msg("hilo: %s\n", hilo->name);
-
     thread_unblock(hilo); 
   } 
   sema->value++;
@@ -146,6 +149,7 @@ sema_up (struct semaphore *sema)
 
   if(hilo != NULL && hilo->priority > thread_current()->priority)
   {
+    //add_to_waiting_list(0);
     thread_yield();
   }
 }
@@ -282,9 +286,11 @@ void lock_acquire (struct lock *lock)
   }
   
   sema_down (&lock->semaphore);
+  //msg("- %d -", list_size(&(lock->semaphore).waiters));
   lock->holder = thread_current ();
   //msg("\nHolde: %s", (lock->holder)->name);
   intr_set_level(old_level);
+  
 }
 
 /* Tries to acquire LOCK and returns true if successful or false
@@ -318,7 +324,8 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  enum intr_level old_level = intr_disable();
+  enum intr_level old_level;
+  old_level  = intr_disable();
   
   struct old_priority *actual_old;
   int found = 0 ;
@@ -369,7 +376,7 @@ lock_release (struct lock *lock)
     }
     //msg("\n-+%d-\n", actual_old->lock);
     if(found && !mayor){
-      //msg("holder of %d: %s, pri: %d, new: %d\n", lock,(lock->holder)->name, (lock->holder)->priority, actual_old->old_pr);
+      //msg("holder of %d: %s, pri: %d, return: %d\n", lock,(lock->holder)->name, (lock->holder)->priority, actual_old->old_pr);
       (lock->holder)->priority = actual_old->old_pr;
       list_remove(&(actual_old->elem));
       free(actual_old);
@@ -381,6 +388,10 @@ lock_release (struct lock *lock)
       free(actual_old);
     }
 
+    if(list_size(&(lock->holder)->old_priority_list) == 0 && (lock->holder)->old_priority != -1){
+      (lock->holder)->priority = (lock->holder)->old_priority;
+      (lock->holder)->old_priority = -1;
+    }
     
     //msg("\n-+%d-\n", actual_old->lock);
     /*
@@ -393,9 +404,10 @@ lock_release (struct lock *lock)
 
   }
 
-  intr_set_level(old_level);
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  intr_set_level(old_level);
+  
   
 }
 

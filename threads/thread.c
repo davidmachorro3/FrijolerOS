@@ -395,8 +395,13 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority)
 {
-  thread_current ()->old_priority = thread_current ()->priority;
-  thread_current ()->priority = new_priority;
+  if(list_size(&thread_current()->old_priority_list) > 0){
+    thread_current ()->old_priority = new_priority;
+  }else{
+    thread_current ()->old_priority = thread_current ()->priority;
+    thread_current ()->priority = new_priority;
+  }
+  
 
   /*abril aca poner parte*/
   struct  list_elem *elemento_actual = list_begin(&ready_list);
