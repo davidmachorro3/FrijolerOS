@@ -19,9 +19,6 @@ void halt (void) {
 }
 
 
-
-
-
 void exit (int status) {
   //Ver que mas hay que hacer aqui
   
@@ -29,11 +26,64 @@ void exit (int status) {
 
 }
 
+pid_t exec (const char *cmd_line) {
+  
+  //Provisional
+
+  
+
+  return 0;
+}
+
+int wait (pid_t pid) {
+
+  //Provisional 
+  return 0;  
+}
+
+bool create (const char *file, unsigned initial_size) {
+  //Provisional
+  return false;
+}
+
+bool remove (const char *file) {
+  //Provisional
+  return false;
+}
+
+int open (const char *file) {
+  //Provisional
+  return 0;
+}
+
+int filesize (int fd) {
+  //Provisional
+  return 0;
+}
+
+int read (int fd, void *buffer, unsigned size) {
+  //Provisional
+  return 0;
+}
+
 int write (int fd, const void *buffer, unsigned size) {
   
   //Provisionalmente
 
   return 0;
+}
+
+void seek (int fd, unsigned position) {
+
+}
+
+unsigned tell (int fd) {
+  //Provisional
+  return 0;
+}
+
+void close (int fd) {
+
 }
 
 static void syscall_handler (struct intr_frame *);
