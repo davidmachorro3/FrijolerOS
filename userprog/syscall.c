@@ -200,7 +200,26 @@ syscall_handler (struct intr_frame *f UNUSED)
 
       puntero = pagedir_get_page(page_directory, (void *)puntero_buffer);
 
+      if(is_kernel_vaddr((void *)puntero_buffer) || ((int)puntero_buffer) < 0x08084000 || puntero == NULL) {
+        exit(-1);
+        return;
+      }
       
+      puntero = pagedir_get_page(page_directory, (void *)puntero_size);
+
+      if(is_kernel_vaddr((void *)puntero_size) || ((int)puntero_size) < 0x08084000 || puntero == NULL) {
+        exit(-1);
+        return;
+      }
+
+      int fd = *puntero_fd;
+      void* buffer = (void *)(*puntero_buffer);
+      unsigned size = *puntero_size;
+
+
+      f->eax = write(fd, buffer, size);
+
+      break;
     }
     case SYS_SEEK:
     {
