@@ -228,10 +228,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
   int i;
   char *name;
   char *temp;
+  char *real_name;
 
   name = malloc(strlen(file_name)+1);
   strlcpy(name, file_name, strlen(file_name)+1);
-  name = strtok_r(name, " " ,&temp);
+  real_name = strtok_r(name, " " ,&temp);
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -239,10 +240,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
-  file = filesys_open (name);
+  file = filesys_open (real_name);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", name);
+      printf ("load: %s: open failed\n", real_name);
       goto done; 
     }
 
@@ -255,7 +256,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", name);
+      printf ("load: %s: error loading executable\n", real_name);
       goto done; 
     }
 
