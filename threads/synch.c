@@ -285,11 +285,15 @@ void lock_acquire (struct lock *lock)
 
       actual_elem = list_begin(&((lock->holder)->participating_locks));
       struct lock_part_taking *temp_lock;
-      while(actual_elem != list_end(&((lock->holder)->participating_locks))){
+      while(actual_elem != list_end(&((lock->holder)->participating_locks)))
+      {
 
-
-
-
+        temp_lock = list_entry (actual_elem, struct lock_part_taking, elem);
+        if ((((temp_lock) -> lock) -> older) -> priority == (lock-> holder) -> priority)
+        {
+          (((temp_lock) -> lock) ->holder) -> priority = max_priority;
+        }
+        actual_elem = list_next(actual_elem);
         
       }
 
