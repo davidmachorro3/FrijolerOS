@@ -76,7 +76,16 @@ int write (int fd, const void *buffer, unsigned size) {
   
   //Provisionalmente
 
-  return 0;
+  int tamano_escrito = 0;
+
+  if(fd == 1) {
+    putbuf((char *)buffer, (size_t)size);
+    tamano_escrito = size;
+  } else {
+
+  }
+
+  return tamano_escrito;
 }
 
 void seek (int fd, unsigned position) {
