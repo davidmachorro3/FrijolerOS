@@ -131,7 +131,7 @@ sema_up (struct semaphore *sema)
   ASSERT (sema != NULL);
   
   old_level = intr_disable ();
-  struct thread *hilo;
+  struct thread *hilo = NULL;
   if (!list_empty (&sema->waiters))
   {
     list_sort(&sema->waiters,priority_compare,NULL);
