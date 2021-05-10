@@ -479,10 +479,12 @@ setup_stack(void **esp, const char *file_name)
       //printf("%d\n", (int)esp);
       for(int i = argn; i > 0; i--)
         {
-          arg = strlcat(argv[i-1], "\0", strlen(argv[i-1]) + strlen("\0") + 1);
-          *esp -= strlen(arg);
-          memcpy(*esp, (void *)arg, strlen(arg));  // push arg a stack
-          argmem[i-1] = (void *)*esp;  //guardar stack pointer actual/posicion de arg en stack
+          
+          arg = argv[i-1];
+          *esp -= (strlen(arg) + 1);
+          //AQUI ESTABA HACIENDO PRINTS PARA EL DEBUGGING DE STACK POINTER
+          memcpy(*esp, (void *)arg, strlen(arg) + 1);
+          argmem[i-1] = (void *)*esp;
         }
         
         //Alinear la memoria
