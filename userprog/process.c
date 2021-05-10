@@ -490,8 +490,8 @@ setup_stack(void **esp, const char *file_name)
         //Alinear la memoria
 
         int word_align = (int)*esp % 4;
-        *esp -= word_align;
-        memset(*esp, 0, word_align);
+        *esp -= (word_align + 4);
+        memset(*esp, 0, word_align + 4);
 
         //Ultimo argumento
         *esp = *esp - 4;
