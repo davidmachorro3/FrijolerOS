@@ -452,16 +452,16 @@ setup_stack(void **esp, const char *file_name)
   char *args;
   char *token;
   int argn = 0; //numero de argumentos
-  int charsize = sizeof(char *);
+  int charsize = sizeof(char);
   args = malloc(strlen(file_name) + 1);
-  int arglen;
+  int arglen = 0;
   strlcpy(args, file_name, strlen(file_name) + 1);
-  char *argv[10];
+  char **argv = malloc(sizeof(char *) * 10);
   char *temp;
   char *arg;
 
-  //obtener todos los argumentos y guardarlos en argv[]
-  while ((token = strtok_r(args, " ", &temp)) != NULL)
+  //obtener todos los argumentos (incluyendo el nombre del exec) y guardarlos en argv[]
+  for (token = strtok_r(args, " ", &temp);token != NULL;token = strtok_r(NULL, " ", &temp))
   {  
     argv[argn] = token;
     argn++;
