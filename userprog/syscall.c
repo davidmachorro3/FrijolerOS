@@ -130,13 +130,19 @@ syscall_handler (struct intr_frame *f UNUSED)
       
     case SYS_EXIT: 
     {
-      // Leer parametro status y llamar a funcion
+      int *puntero_status = (int *)f->esp + 1;
 
-      int status = *((int*)f->esp + 1);
+      puntero = pagedir_get_page(page_directory, (void *)puntero_status);
 
-      exit(status);
+      if(is_kernel_vaddr((void *)puntero_status) || ((int)puntero_status) < 0x08084000 || puntero == NULL) {
+        exit(-1);
+      } else {
+        int status = *puntero_status;
 
-      break;
+        exit(status);
+      }
+
+	    break;
     }
     case SYS_EXEC:
     {
