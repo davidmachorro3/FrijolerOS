@@ -131,7 +131,7 @@ sema_up (struct semaphore *sema)
   ASSERT (sema != NULL);
   
   old_level = intr_disable ();
-  struct thread *hilo = NULL;
+  struct thread *hilo;
   if (!list_empty (&sema->waiters))
   {
     list_sort(&sema->waiters,priority_compare,NULL);
@@ -262,6 +262,7 @@ void lock_acquire (struct lock *lock)
       struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
       int found = 0;
       struct old_priority *actual_old;
+      struct thread *thread_priority_shared;
 
       while(actual_elem != list_end(&((lock->holder)->old_priority_list))) {
         actual_old = list_entry(actual_elem, struct old_priority, elem);
@@ -277,6 +278,9 @@ void lock_acquire (struct lock *lock)
         new_old->lock = lock;
         list_push_back(&((lock->holder)->old_priority_list), &(new_old->elem));
         //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, new_old->old_pr, max_priority);
+        struct lock_part_taking *new_lock = (struct lock_part_taking *)malloc(sizeof(struct lock_part_taking));
+        new_lock->lock = lock;
+        list_push_back(&(thread_current()->participating_locks), &(new_lock->elem));
       }
 
 
