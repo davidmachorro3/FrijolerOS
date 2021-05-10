@@ -90,6 +90,11 @@ struct old_priority{
    struct list_elem elem;
 };
 
+struct lock_part_taking{
+   struct lock *lock;
+   struct list_elem elem;
+};
+
 struct thread
   {
     /* Owned by thread.c. */
@@ -110,6 +115,8 @@ struct thread
     int old_priority;
 
     struct list old_priority_list;
+
+    struct list participating_locks;
 
     int touched;
 
