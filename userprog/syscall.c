@@ -187,18 +187,20 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_WRITE: 
     {
+      int *puntero_fd = (int*)f->esp + 1;
+      int *puntero_buffer = (int*)f->esp + 2;
+      unsigned *puntero_size = (unsigned*)f->esp + 3;
 
-      //Obtener parametros para write
+      puntero = pagedir_get_page(page_directory, (void *)puntero_fd);
+      
+      if(is_kernel_vaddr((void *)puntero_fd) || ((int)puntero_fd) < 0x08084000 || puntero == NULL) {
+        exit(-1);
+        return;
+      }
 
-      int fd = *((int*)f->esp + 1);
-      void* buffer = (void*)(*((int*)f->esp + 2));
-      unsigned size = *((unsigned*)f->esp + 3);
+      puntero = pagedir_get_page(page_directory, (void *)puntero_buffer);
 
-      //Verificar aqui o en write que el puntero buffer es valido
-
-      f->eax = write(fd, buffer, size);
-
-      break;
+      
     }
     case SYS_SEEK:
     {
