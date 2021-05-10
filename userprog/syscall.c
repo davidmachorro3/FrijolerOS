@@ -9,6 +9,9 @@
 #include "threads/init.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+#include "lib/kernel/stdio.h"
+#include "filesys/off_t.h"
+
 
 void halt (void) {
   //Terminar PintoS
@@ -20,7 +23,7 @@ void halt (void) {
 
 
 void exit (int status) {
-  //Ver que mas hay que hacer aqui
+  //Creo que aqui tambien hay que liberar espacio
   
   printf("%s: exit(%d)", thread_current()->name, status);
 
@@ -42,17 +45,20 @@ int wait (pid_t pid) {
 }
 
 bool create (const char *file, unsigned initial_size) {
-  //Provisional
-  return false;
+  
+  return filesys_create(file, (off_t)initial_size);
 }
 
 bool remove (const char *file) {
-  //Provisional
-  return false;
+  
+  return filesys_remove(file);
 }
 
 int open (const char *file) {
   //Provisional
+
+  //Hacer mapeo entre files y file descriptors
+
   return 0;
 }
 
