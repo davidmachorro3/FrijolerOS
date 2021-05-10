@@ -283,6 +283,17 @@ void lock_acquire (struct lock *lock)
         list_push_back(&(thread_current()->participating_locks), &(new_lock->elem));
       }
 
+      actual_elem = list_begin(&((lock->holder)->participating_locks));
+      struct lock_part_taking *temp_lock;
+      while(actual_elem != list_end(&((lock->holder)->participating_locks))){
+
+
+
+
+        
+      }
+
+
 
       (lock->holder)->priority = max_priority;
     }
