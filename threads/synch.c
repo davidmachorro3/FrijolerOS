@@ -33,14 +33,30 @@
 #include "threads/thread.h"
 #include <string.h>
 
+/* One semaphore in a list. */
+struct semaphore_elem 
+  {
+    struct list_elem elem;              /* List element. */
+    struct semaphore semaphore;         /* This semaphore. */
 
+    struct thread *thread;              /* Thread al que pertenese*/
+
+    
+  };
 
 
 static bool priority_compare(const struct list_elem *a_, const struct list_elem *b_,void *aux UNUSED)
 {
   const struct thread *a = list_entry (a_, struct thread, elem);
   const struct thread *b = list_entry (b_, struct thread, elem);
-  
+  return a->priority > b->priority;
+}
+
+static bool priority_compare_cond(const struct list_elem *a_, const struct list_elem *b_,void *aux UNUSED)
+{
+  const struct thread *a = (list_entry (a_, struct semaphore_elem, elem))->thread;
+  const struct thread *b = (list_entry (b_, struct semaphore_elem, elem))->thread;
+  //msg("%d", a->priority > b->priority);
   return a->priority > b->priority;
 }
 
@@ -83,9 +99,10 @@ sema_down (struct semaphore *sema)
   while (sema->value == 0) 
     {
       list_insert_ordered (&sema->waiters, &thread_current ()->elem, priority_compare, NULL);
+      
       thread_block ();
     }
-
+  
   sema->value--;
   
   intr_set_level (old_level);
@@ -138,10 +155,10 @@ sema_up (struct semaphore *sema)
     //msg("- %d -", list_size(&sema->waiters));
     hilo = list_entry (list_pop_front (&sema->waiters),struct thread, elem);
     //OSWALDO THREAD UNBLOCK
-    //msg("current: %s, pri: %d", thread_current()->name, thread_current()->priority);
-    //msg("hilo: %s, pri: %d\n", hilo->name, hilo->priority);
+   //msg("current: %s, pri: %d", thread_current()->name, thread_current()->priority);
     
     thread_unblock(hilo); 
+    //msg("hilo: %s, pri: %d", hilo->name, hilo->priority);
   } 
   sema->value++;
   intr_set_level (old_level);
@@ -251,13 +268,13 @@ void lock_acquire (struct lock *lock)
     
     if(((lock->holder)->priority) < max_priority)
     { 
-      /* 
+       
       //msg("Antes \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
+      /*
       (lock->holder)->old_priority = (lock->holder)->priority;
       (lock->holder)->priority = max_priority;
       (lock->holder)->touched = 1;
-      //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
-      */
+      */      
 
       struct list_elem *actual_elem = list_begin(&((lock->holder)->old_priority_list));
       int found = 0;
@@ -289,7 +306,7 @@ void lock_acquire (struct lock *lock)
       {
 
         temp_lock = list_entry (actual_elem, struct lock_part_taking, elem);
-        if ((((temp_lock) -> lock) -> older) -> priority == (lock-> holder) -> priority)
+        if ((((temp_lock) -> lock) -> holder) -> priority == (lock-> holder) -> priority)
         {
           (((temp_lock) -> lock) ->holder) -> priority = max_priority;
         }
@@ -297,9 +314,10 @@ void lock_acquire (struct lock *lock)
         
       }
 
-
-
       (lock->holder)->priority = max_priority;
+      
+      //msg("Despues \n%s: old: %d, new: %d\n",(lock->holder)->name, (lock->holder)->old_priority, (lock->holder)->priority);
+
     }
     //msg("\nSemaforo %d\n", (lock->semaphore).value);
   }
@@ -407,7 +425,7 @@ lock_release (struct lock *lock)
       free(actual_old);
     }
 
-    if(list_size(&(lock->holder)->old_priority_list) == 0 && (lock->holder)->old_priority != -1){
+    if(list_size(&(lock->holder)->old_priority_list) == 0 && (lock->holder)->old_priority != -1 && (lock->holder)->old_priority < (lock->holder)->priority){
       (lock->holder)->priority = (lock->holder)->old_priority;
       (lock->holder)->old_priority = -1;
     }
@@ -441,12 +459,7 @@ lock_held_by_current_thread (const struct lock *lock)
   return lock->holder == thread_current ();
 }
 
-/* One semaphore in a list. */
-struct semaphore_elem 
-  {
-    struct list_elem elem;              /* List element. */
-    struct semaphore semaphore;         /* This semaphore. */
-  };
+
 
 /* Initializes condition variable COND.  A condition variable
    allows one piece of code to signal a condition and cooperating
@@ -483,6 +496,7 @@ void
 cond_wait (struct condition *cond, struct lock *lock) 
 {
   struct semaphore_elem waiter;
+  waiter.thread = thread_current();
 
   ASSERT (cond != NULL);
   ASSERT (lock != NULL);
@@ -491,8 +505,10 @@ cond_wait (struct condition *cond, struct lock *lock)
   
   sema_init (&waiter.semaphore, 0);
   list_push_back (&cond->waiters, &waiter.elem);
+  //msg("-- Size %d",list_size(&cond->waiters));
   lock_release (lock);
   sema_down (&waiter.semaphore);
+  
   lock_acquire (lock);
 }
 
@@ -513,10 +529,13 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
 
   if (!list_empty (&cond->waiters))
   {
-    list_sort(&cond->waiters,priority_compare, NULL);
-    list_reverse(&cond->waiters);
-    sema_up (&list_entry (list_pop_front (&cond->waiters),
-                          struct semaphore_elem, elem)->semaphore);
+    list_sort(&cond->waiters,priority_compare_cond, NULL);
+    //list_reverse(&cond->waiters);
+    struct semaphore_elem *waiter = list_entry(list_pop_front(&cond->waiters),struct semaphore_elem, elem);
+    //msg("Current: %s, Pri: %d", thread_current()->name, thread_current()->priority);
+    //msg("-- sema V %d", list_size(&waiter->semaphore.waiters));
+    sema_up (&waiter->semaphore);
+    //msg("-- sema V %d", waiter->semaphore.value);
   }
 }
 
