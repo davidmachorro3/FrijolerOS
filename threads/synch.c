@@ -60,7 +60,12 @@ static bool priority_compare_cond(const struct list_elem *a_, const struct list_
   return a->priority > b->priority;
 }
 
+void
+donate_lock_pals(struct thread *donator, int priority)
+{
 
+
+}
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -300,19 +305,7 @@ void lock_acquire (struct lock *lock)
         list_push_back(&(thread_current()->participating_locks), &(new_lock->elem));
       }
 
-      actual_elem = list_begin(&((lock->holder)->participating_locks));
-      struct lock_part_taking *temp_lock;
-      while(actual_elem != list_end(&((lock->holder)->participating_locks)))
-      {
-
-        temp_lock = list_entry (actual_elem, struct lock_part_taking, elem);
-        if ((((temp_lock) -> lock) -> holder) -> priority == (lock-> holder) -> priority)
-        {
-          (((temp_lock) -> lock) ->holder) -> priority = max_priority;
-        }
-        actual_elem = list_next(actual_elem);
-        
-      }
+      donate_lock_pals(lock->holder, max_priority);
 
       (lock->holder)->priority = max_priority;
       
