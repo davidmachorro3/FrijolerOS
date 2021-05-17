@@ -63,8 +63,12 @@ static bool priority_compare_cond(const struct list_elem *a_, const struct list_
 void
 donate_lock_pals(struct thread *donator, int priority)
 {
+  struct list_elem *actual_elem = list_begin(&(donator->participating_locks));
+  struct lock_part_taking *temp_lock;
+  while(actual_elem != list_end(&(donator->participating_locks)))
+  {
 
-
+  }
 }
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
