@@ -476,7 +476,7 @@ setup_stack(void **esp, const char *file_name)
     if (success)
     {
       *esp = PHYS_BASE;
-      //printf("%d\n", (int)esp);
+      
       for(int i = argn; i > 0; i--)
         {
           
@@ -491,6 +491,9 @@ setup_stack(void **esp, const char *file_name)
 
         int word_align = (int)*esp % 4;
         *esp -= (word_align + 4);
+
+        hex_dump(0xbfffffd0, *esp, 50, true);
+
         memset(*esp, 0, word_align + 4);
 
         //Ultimo argumento

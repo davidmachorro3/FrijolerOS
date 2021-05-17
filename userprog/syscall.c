@@ -11,7 +11,7 @@
 #include "filesys/file.h"
 #include "lib/kernel/stdio.h"
 #include "filesys/off_t.h"
-
+#include "devices/shutdown.h"
 
 void halt (void) {
   //Terminar PintoS
