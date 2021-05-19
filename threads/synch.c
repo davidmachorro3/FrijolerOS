@@ -71,7 +71,7 @@ donate_lock_pals(struct thread *donator, int priority)
     if((((temp_lock) -> lock) -> holder) -> priority <= donator ->priority)
     {
       (((temp_lock) -> lock) -> holder) ->priority = priority;
-      donate_lock_pals((temp_lock->lock)->holder,priority);
+      donate_lock_pals((temp_lock->lock)->holder, priority);
     }
     actual_elem = list_next(actual_elem);
 
