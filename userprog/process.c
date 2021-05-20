@@ -467,7 +467,6 @@ setup_stack(void **esp, const char *file_name)
     argn++;
   }
   void* argmem[argn]; //arreglo de posiciones de memoria de argumetos
-  free(args);
 
   kpage = palloc_get_page(PAL_USER | PAL_ZERO);
   if (kpage != NULL)
@@ -475,7 +474,9 @@ setup_stack(void **esp, const char *file_name)
     success = install_page(((uint8_t *)PHYS_BASE) - PGSIZE, kpage, true);
     if (success)
     {
-      *esp = PHYS_BASE;
+      *esp = PHYS_BASE - 4;
+
+      printf("PHYS_BASE : %p\n\n", *esp);
       
       for(int i = argn; i > 0; i--)
         {
@@ -483,7 +484,11 @@ setup_stack(void **esp, const char *file_name)
           arg = argv[i-1];
           *esp -= (strlen(arg) + 1);
           //AQUI ESTABA HACIENDO PRINTS PARA EL DEBUGGING DE STACK POINTER
-          memcpy(*esp, (void *)arg, strlen(arg) + 1);
+          
+          printf("SP : %p\n\n", *esp);
+          
+          strlcpy((char *)*esp, arg, strlen(arg) + 1);
+
           argmem[i-1] = (void *)*esp;
         }
         
@@ -492,7 +497,7 @@ setup_stack(void **esp, const char *file_name)
         int word_align = (int)*esp % 4;
         *esp -= (word_align + 4);
 
-        hex_dump(0xbfffffd0, *esp, 50, true);
+        hex_dump(0xbffffff0, *esp, 50, true);
 
         memset(*esp, 0, word_align + 4);
 
