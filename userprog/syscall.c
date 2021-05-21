@@ -12,6 +12,7 @@
 #include "lib/kernel/stdio.h"
 #include "filesys/off_t.h"
 #include "devices/shutdown.h"
+#include "userprog/process.h"
 
 void halt (void) {
   //Terminar PintoS
@@ -26,7 +27,7 @@ void exit (int status) {
   //Creo que aqui tambien hay que liberar espacio
   
   printf("%s: exit(%d)", thread_current()->name, status);
-
+  thread_exit();
 }
 
 pid_t exec (const char *cmd_line) {
@@ -79,6 +80,7 @@ int write (int fd, const void *buffer, unsigned size) {
   int tamano_escrito = 0;
 
   if(fd == 1) {
+
     putbuf((char *)buffer, (size_t)size);
     tamano_escrito = size;
   } else {
@@ -126,7 +128,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
   //Verificar que el stack pointer sea valido
 
-  if(is_kernel_vaddr(f->esp) || ((int)f->esp) < 0x08084000 || puntero == NULL) {
+  if(is_kernel_vaddr(f->esp) || ((uint32_t)f->esp) < 0x08084000 || puntero == NULL) {
     // Terminar el proceso que mando puntero (exit) y liberar sus recursos
     exit(-1);
   }
@@ -139,12 +141,15 @@ syscall_handler (struct intr_frame *f UNUSED)
   {
     case SYS_HALT:
     {
+      printf("JOSUE1");
+
       halt();
       break;
     }
       
     case SYS_EXIT: 
     {
+
       int *puntero_status = (int *)f->esp + 1;
 
       puntero = pagedir_get_page(page_directory, (void *)puntero_status);
@@ -161,6 +166,8 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_EXEC:
     {
+      printf("JOSUE2");
+
       char *cmd_line = (char *)(*((int*)f->esp + 1));
       
 
@@ -169,32 +176,44 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_WAIT:
     {
+      printf("JOSUE3");
+
       pid_t pid = (pid_t)(*((int*)f->esp + 1));
       break;
     }
     case SYS_CREATE:
     {
+      printf("JOSUE4");
+
       char *file = (char *)(*((int*)f->esp + 1));
       unsigned initial_size = *((unsigned *)f->esp + 2);
       break;
     }
     case SYS_REMOVE:
     {
+      printf("JOSUE5");
+
       char *file = (char *)(*((int*)f->esp + 1));
       break;
     }
     case SYS_OPEN:
     {
+      printf("JOSUE6");
+
       char *file = (char *)(*((int*)f->esp + 1));
       break;
     }
     case SYS_FILESIZE:
     {
+
+      printf("JOSUE7");
       int fd = *((int*)f->esp + 1);
       break;
     }
     case SYS_READ:
     {
+      printf("JOSUE8");
+
       int fd = *((int*)f->esp + 1);
       void* buffer = (void*)(*((int*)f->esp + 2));
       unsigned size = *((unsigned*)f->esp + 3);
@@ -202,27 +221,31 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_WRITE: 
     {
-      int *puntero_fd = (int*)f->esp + 1;
-      int *puntero_buffer = (int*)f->esp + 2;
-      unsigned *puntero_size = (unsigned*)f->esp + 3;
+      printf("++++++++JOSUE+++++++");
+
+      int *puntero_fd = ((int*)f->esp) + 1;
+      int *puntero_buffer = ((int*)f->esp) + 2;
+      unsigned *puntero_size = ((unsigned*)f->esp) + 3;
 
       puntero = pagedir_get_page(page_directory, (void *)puntero_fd);
       
-      if(is_kernel_vaddr((void *)puntero_fd) || ((int)puntero_fd) < 0x08084000 || puntero == NULL) {
+      if(is_kernel_vaddr((void *)puntero_fd) || ((uint32_t)puntero_fd) < 0x08084000 || puntero == NULL) {
         exit(-1);
         return;
       }
 
       puntero = pagedir_get_page(page_directory, (void *)puntero_buffer);
 
-      if(is_kernel_vaddr((void *)puntero_buffer) || ((int)puntero_buffer) < 0x08084000 || puntero == NULL) {
+      if(is_kernel_vaddr((void *)puntero_buffer) || ((uint32_t)puntero_buffer) < 0x08084000 || puntero == NULL) {
         exit(-1);
         return;
       }
       
       puntero = pagedir_get_page(page_directory, (void *)puntero_size);
 
-      if(is_kernel_vaddr((void *)puntero_size) || ((int)puntero_size) < 0x08084000 || puntero == NULL) {
+      printf("\n\nPUNTEROPOO : %p\n\n", puntero);
+
+      if(is_kernel_vaddr((void *)puntero_size) || ((uint32_t)puntero_size) < 0x08084000 || puntero == NULL) {
         exit(-1);
         return;
       }
@@ -238,17 +261,21 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_SEEK:
     {
+      printf("++++++++JOSUE9");
+
       int fd = *((int*)f->esp + 1);
       unsigned position = *((unsigned*)f->esp + 2);
       break;
     }
     case SYS_TELL:
     {
+      printf("JOSUE10");
       int fd = *((int*)f->esp + 1);
       break;
     }
     case SYS_CLOSE:
     {
+      printf("JOSUE11");
       int fd = *((int*)f->esp + 1);
       break;
     }

@@ -474,7 +474,7 @@ setup_stack(void **esp, const char *file_name)
     success = install_page(((uint8_t *)PHYS_BASE) - PGSIZE, kpage, true);
     if (success)
     {
-      *esp = PHYS_BASE - 4;
+      *esp = PHYS_BASE;
 
       printf("PHYS_BASE : %p\n\n", *esp);
       
@@ -496,8 +496,6 @@ setup_stack(void **esp, const char *file_name)
 
         int word_align = (int)*esp % 4;
         *esp -= (word_align + 4);
-
-        hex_dump(0xbffffff0, *esp, 50, true);
 
         memset(*esp, 0, word_align + 4);
 
@@ -521,10 +519,14 @@ setup_stack(void **esp, const char *file_name)
        *esp -= sizeof(void *);
        void *null_pointer = NULL;
        memcpy(*esp, &null_pointer, sizeof(void *));
+
+
+       hex_dump(0xbfffffc0, *esp, 75, true);
     }
     else
       palloc_free_page(kpage);
   }
+
   return success;
 }
 
