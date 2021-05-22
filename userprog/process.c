@@ -503,7 +503,7 @@ setup_stack(void **esp, const char *file_name)
         *esp = *esp - 4;
         memset(*esp, 0, 4);
 
-        for(int i = argn; i > 1; i--)
+        for(int i = argn; i > 0; i--)
 
         {
           *esp -= sizeof(char*);
@@ -511,7 +511,10 @@ setup_stack(void **esp, const char *file_name)
         }
 
        *esp -= sizeof(char**);
-       memcpy(*esp, &argmem[0], sizeof(char**));
+       //arreglar estooo
+       void *direccion_arreglo = &argv;
+
+       memcpy(*esp, &direccion_arreglo, sizeof(char **));
         
        *esp -= sizeof(int);
        memcpy(*esp, &argn, sizeof(int)); 
