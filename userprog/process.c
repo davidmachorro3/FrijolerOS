@@ -517,9 +517,8 @@ setup_stack(void **esp, const char *file_name)
        memcpy(*esp, &argn, sizeof(int)); 
 
        *esp -= sizeof(void *);
-       void *null_pointer = NULL;
-       memcpy(*esp, &null_pointer, sizeof(void *));
-
+       void *null_pointer = NULL;   
+       memset(*esp, 0 ,4);
 
        hex_dump(0xbfffffc0, *esp, 75, true);
     }
