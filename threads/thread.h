@@ -167,4 +167,8 @@ int thread_get_load_avg (void);
 
 void remover_thread_durmiente(int64_t ticks);
 
+int get_size_wating_tsleep(void);
+int get_size_ready_list(void);
+bool thread_current_is_idle(void);
+
 #endif /* threads/thread.h */

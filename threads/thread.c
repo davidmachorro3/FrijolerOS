@@ -11,6 +11,8 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "devices/timer.h"
+#include "threads/fixed_point.c"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -104,7 +106,7 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
-bool thread_mlfqs;
+bool thread_mlfqs = true;
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -455,7 +457,8 @@ int
 thread_get_load_avg (void)
 {
   /* Not yet implemented. */
-  return 0;
+  //msg("%d", round_down_fixp(100*get_load_avg()));
+  return round_nearest_fixp(100*get_load_avg());
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
@@ -707,4 +710,17 @@ void remover_thread_durmiente(int64_t ticks)
 
   }
 
+}
+
+int get_size_wating_tsleep(){
+  return list_size(&waiting_tsleep);
+}
+
+int get_size_ready_list(){
+  return list_size(&ready_list); 
+}
+
+bool thread_current_is_idle()
+{
+  return thread_current() == idle_thread;
 }
