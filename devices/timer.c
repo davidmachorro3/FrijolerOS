@@ -7,6 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "threads/fixed_point.c"
 
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -23,6 +24,8 @@ static int64_t ticks;
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
 static unsigned loops_per_tick;
+
+static int64_t load_avg = 0;
 
 static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
@@ -174,8 +177,23 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  int current = 0;
 
   remover_thread_durmiente(ticks);
+
+  if(thread_current() =! NULL && !thread_current_is_idle())
+  {
+    current == 1;
+  }
+
+  if((timer_ticks() % TIMER_FREQ) == 0)
+  {
+    fixpoint a = divi_fixp(crear_fix(59), crear_fix(60));
+    fixpoint b = divi_fixp(crear_fix(1), crear_fix(60));
+
+    load_avg = multi_fixp(a, load_avg) + b * (get_size_ready_list() +current);
+  }
+
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -247,4 +265,9 @@ real_time_delay (int64_t num, int32_t denom)
      the possibility of overflow. */
   ASSERT (denom % 1000 == 0);
   busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000));
+}
+
+fixpoint get_load_av()
+{
+  return load_avg;
 }
