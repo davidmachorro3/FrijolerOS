@@ -27,6 +27,6 @@ void timer_ndelay (int64_t nanoseconds);
 
 void timer_print_stats (void);
 
-fixpoing get_load_avg(void);
+fixpoint get_load_avg(void);
 
 #endif /* devices/timer.h */

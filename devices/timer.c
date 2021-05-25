@@ -181,15 +181,15 @@ timer_interrupt (struct intr_frame *args UNUSED)
 
   remover_thread_durmiente(ticks);
 
-  if(thread_current() =! NULL && !thread_current_is_idle())
+  if(thread_current() != NULL && !thread_current_is_idle())
   {
-    current == 1;
+    current = 1;
   }
 
   if((timer_ticks() % TIMER_FREQ) == 0)
   {
-    fixpoint a = divi_fixp(crear_fix(59), crear_fix(60));
-    fixpoint b = divi_fixp(crear_fix(1), crear_fix(60));
+    fixpoint a = divi_fixp(crear_fixp(59), crear_fixp(60));
+    fixpoint b = divi_fixp(crear_fixp(1), crear_fixp(60));
 
     load_avg = multi_fixp(a, load_avg) + b * (get_size_ready_list() +current);
   }
@@ -267,7 +267,7 @@ real_time_delay (int64_t num, int32_t denom)
   busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000));
 }
 
-fixpoint get_load_av()
+fixpoint get_load_avg()
 {
   return load_avg;
 }
