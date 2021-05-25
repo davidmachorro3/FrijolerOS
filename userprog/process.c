@@ -124,6 +124,8 @@ process_exit (void)
          that's been freed (and cleared). */
       cur->pagedir = NULL;
       pagedir_activate (NULL);
+
+
       pagedir_destroy (pd);
     }
 }
@@ -459,6 +461,7 @@ setup_stack(void **esp, const char *file_name)
   char **argv = malloc(sizeof(char *) * 10);
   char *temp;
   char *arg;
+  uint32_t direccion_arreglo;
 
   //obtener todos los argumentos (incluyendo el nombre del exec) y guardarlos en argv[]
   for (token = strtok_r(args, " ", &temp);token != NULL;token = strtok_r(NULL, " ", &temp))
@@ -508,11 +511,14 @@ setup_stack(void **esp, const char *file_name)
         {
           *esp -= sizeof(char*);
           memcpy(*esp, &argmem[i-1], sizeof(char*));
+        
+          if(i == 1) {
+            direccion_arreglo = (uint32_t)*esp;
+          }
         }
 
        *esp -= sizeof(char**);
        //arreglar estooo
-       void *direccion_arreglo = &argv;
 
        memcpy(*esp, &direccion_arreglo, sizeof(char **));
         
@@ -523,7 +529,7 @@ setup_stack(void **esp, const char *file_name)
        void *null_pointer = NULL;   
        memset(*esp, 0 ,4);
 
-       hex_dump(0xbfffffc0, *esp, 75, true);
+       //hex_dump(0xbfffffc0, *esp, 75, true);
     }
     else
       palloc_free_page(kpage);

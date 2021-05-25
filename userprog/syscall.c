@@ -28,6 +28,7 @@ void exit (int status) {
   
   printf("%s: exit(%d)", thread_current()->name, status);
   thread_exit();
+  //printf("\n\nREGRESEEEE\n\n");
 }
 
 pid_t exec (const char *cmd_line) {
@@ -116,7 +117,7 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
-  printf ("system call!\n");
+  //printf ("system call!\n");
 
   //Conseguir directorio de paginas actual
 
@@ -141,7 +142,6 @@ syscall_handler (struct intr_frame *f UNUSED)
   {
     case SYS_HALT:
     {
-      printf("JOSUE1");
 
       halt();
       break;
@@ -150,11 +150,13 @@ syscall_handler (struct intr_frame *f UNUSED)
     case SYS_EXIT: 
     {
 
+      //printf("\n\nPUNTEROPOO : %p\n\n", puntero);
+
       int *puntero_status = (int *)f->esp + 1;
 
       puntero = pagedir_get_page(page_directory, (void *)puntero_status);
 
-      if(is_kernel_vaddr((void *)puntero_status) || ((int)puntero_status) < 0x08084000 || puntero == NULL) {
+      if(is_kernel_vaddr((void *)puntero_status) || ((uint32_t)puntero_status) < 0x08084000 || puntero == NULL) {
         exit(-1);
       } else {
         int status = *puntero_status;
@@ -166,24 +168,19 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_EXEC:
     {
-      printf("JOSUE2");
 
       char *cmd_line = (char *)(*((int*)f->esp + 1));
       
-
-      //Pendiente de implementar
       break;
     }
     case SYS_WAIT:
     {
-      printf("JOSUE3");
 
       pid_t pid = (pid_t)(*((int*)f->esp + 1));
       break;
     }
     case SYS_CREATE:
     {
-      printf("JOSUE4");
 
       char *file = (char *)(*((int*)f->esp + 1));
       unsigned initial_size = *((unsigned *)f->esp + 2);
@@ -191,28 +188,23 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_REMOVE:
     {
-      printf("JOSUE5");
 
       char *file = (char *)(*((int*)f->esp + 1));
       break;
     }
     case SYS_OPEN:
     {
-      printf("JOSUE6");
 
       char *file = (char *)(*((int*)f->esp + 1));
       break;
     }
     case SYS_FILESIZE:
     {
-
-      printf("JOSUE7");
       int fd = *((int*)f->esp + 1);
       break;
     }
     case SYS_READ:
     {
-      printf("JOSUE8");
 
       int fd = *((int*)f->esp + 1);
       void* buffer = (void*)(*((int*)f->esp + 2));
@@ -221,7 +213,6 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_WRITE: 
     {
-      printf("++++++++JOSUE+++++++");
 
       int *puntero_fd = ((int*)f->esp) + 1;
       int *puntero_buffer = ((int*)f->esp) + 2;
@@ -243,8 +234,6 @@ syscall_handler (struct intr_frame *f UNUSED)
       
       puntero = pagedir_get_page(page_directory, (void *)puntero_size);
 
-      printf("\n\nPUNTEROPOO : %p\n\n", puntero);
-
       if(is_kernel_vaddr((void *)puntero_size) || ((uint32_t)puntero_size) < 0x08084000 || puntero == NULL) {
         exit(-1);
         return;
@@ -261,7 +250,6 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_SEEK:
     {
-      printf("++++++++JOSUE9");
 
       int fd = *((int*)f->esp + 1);
       unsigned position = *((unsigned*)f->esp + 2);
@@ -269,13 +257,13 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_TELL:
     {
-      printf("JOSUE10");
+      
       int fd = *((int*)f->esp + 1);
       break;
     }
     case SYS_CLOSE:
     {
-      printf("JOSUE11");
+      
       int fd = *((int*)f->esp + 1);
       break;
     }
