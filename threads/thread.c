@@ -106,7 +106,9 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
-bool thread_mlfqs = true;
+bool thread_mlfqs = false;
+
+static fixpoint recent_cpu;
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -188,6 +190,8 @@ thread_tick (void)
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
+
+    t->recent_cpu += crear_fixp(1);
 }
 
 /* Prints thread statistics. */
@@ -438,17 +442,17 @@ thread_get_priority (void)
 void
 thread_set_nice (int nice UNUSED)
 {
-  /* Not yet implemented. */
+
   thread_current()->nice = nice;
   //Tener cuidado con la division, luego ver si el thread actual ya no tiene la prioridad mas alta
   //thread_current()->priority = PRI_MAX - (thread_get_recent_cpu()/4) - (nice*2)
+  update_nice_priority(thread_current(), NULL);
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void)
 {
-  /* Not yet implemented. */
   return thread_current()->nice;
 }
 
@@ -456,7 +460,6 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void)
 {
-  /* Not yet implemented. */
   //msg("%d", round_down_fixp(100*get_load_avg()));
   return round_nearest_fixp(100*get_load_avg());
 }
@@ -465,8 +468,8 @@ thread_get_load_avg (void)
 int
 thread_get_recent_cpu (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  
+  return round_down_fixp(100*thread_current()->recent_cpu);
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -653,6 +656,11 @@ thread_schedule_tail (struct thread *prev)
 static void
 schedule (void)
 {
+  if(thread_mlfqs){
+    thread_foreach(update_nice_priority,NULL);
+    list_sort(&ready_list, priority_compare, NULL);
+  }
+
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
   struct thread *prev = NULL;
@@ -710,6 +718,17 @@ void remover_thread_durmiente(int64_t ticks)
 
   }
 
+}
+
+void update_recent_cpu(struct thread *t, void *aux UNUSED){
+  fixpoint a = divi_fixp(2*get_load_avg(), (2*get_load_avg() + (1*F)));
+
+  a = multi_fixp(a, t->recent_cpu)+(t->nice * F);
+  t->recent_cpu = a;
+}
+
+void update_nice_priority(struct thread *t,void *aux UNUSED){
+  t->priority = PRI_MAX - (round_down_fixp(t->recent_cpu)/4) - t->nice*2;
 }
 
 int get_size_wating_tsleep(){

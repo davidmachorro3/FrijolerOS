@@ -188,10 +188,12 @@ timer_interrupt (struct intr_frame *args UNUSED)
 
   if((timer_ticks() % TIMER_FREQ) == 0)
   {
-    fixpoint a = divi_fixp(crear_fixp(59), crear_fixp(60));
-    fixpoint b = divi_fixp(crear_fixp(1), crear_fixp(60));
+    fixpoint a = crear_fixp(59)/60;
+    fixpoint b = crear_fixp(1)/60;
 
     load_avg = multi_fixp(a, load_avg) + b * (get_size_ready_list() +current);
+
+    thread_foreach(update_recent_cpu, NULL);
   }
 
 }
@@ -271,3 +273,5 @@ fixpoint get_load_avg()
 {
   return load_avg;
 }
+
+

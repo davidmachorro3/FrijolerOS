@@ -120,6 +120,8 @@ struct thread
 
     int touched;
 
+    int recent_cpu;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -170,5 +172,8 @@ void remover_thread_durmiente(int64_t ticks);
 int get_size_wating_tsleep(void);
 int get_size_ready_list(void);
 bool thread_current_is_idle(void);
+
+void update_recent_cpu(struct thread *, void *);
+void update_nice_priority(struct thread *, void *);
 
 #endif /* threads/thread.h */
