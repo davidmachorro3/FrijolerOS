@@ -289,7 +289,16 @@ run_task (char **argv)
   
   printf ("Executing '%s':\n", task);
 #ifdef USERPROG
-  process_wait (process_execute (task));
+  tid_t nuevo_child = process_execute(task);
+  
+  struct tid_status *new_tid_status = (struct tid_status *)malloc(sizeof(struct tid_status));
+
+  new_tid_status->finished = false;
+  new_tid_status->thread_id = nuevo_child;
+
+  list_push_back(&(thread_current()->childs_with_status), &(new_tid_status->elem));
+
+  process_wait(nuevo_child);
 #else
   run_test (task);
 #endif

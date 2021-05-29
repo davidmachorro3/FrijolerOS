@@ -26,7 +26,32 @@ void halt (void) {
 void exit (int status) {
   //Creo que aqui tambien hay que liberar espacio
   
-  printf("%s: exit(%d)", thread_current()->name, status);
+  printf("%s: exit(%d)\n", thread_current()->name, status);
+  
+  struct thread *padre = thread_current()->parent;
+
+  if(padre != NULL) {
+
+    struct list *hijos_del_padre = &(padre->childs_with_status);
+
+    struct list_elem *elemento;
+
+    tid_t mi_tid = thread_tid();
+
+    for(elemento = list_begin(hijos_del_padre); elemento != list_end(hijos_del_padre); elemento = list_next(elemento)) {
+      struct tid_status *tid_status_actual = list_entry(elemento, struct tid_status, elem);
+
+      tid_t tid_actual = tid_status_actual->thread_id;
+
+      if(mi_tid == tid_actual) {
+        tid_status_actual->finished = true;
+        tid_status_actual->thread_status = status;
+        break;
+      }
+    }
+
+  }
+
   thread_exit();
   //printf("\n\nREGRESEEEE\n\n");
 }
@@ -35,9 +60,18 @@ pid_t exec (const char *cmd_line) {
   
   //Provisional
 
-  
+  tid_t new_tid = process_execute(cmd_line);  
 
-  return 0;
+  struct tid_status *new_tid_status = (struct tid_status *)malloc(sizeof(struct tid_status));
+
+  new_tid_status->finished = false;
+  new_tid_status->thread_id = new_tid;
+
+  list_push_back(&(thread_current()->childs_with_status), &(new_tid_status->elem));
+
+  process_wait(new_tid);
+
+  return new_tid;
 }
 
 int wait (pid_t pid) {

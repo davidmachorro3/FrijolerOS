@@ -95,6 +95,13 @@ struct lock_part_taking{
    struct list_elem elem;
 };
 
+struct tid_status {
+   tid_t thread_id;
+   int thread_status;
+   bool finished;
+   struct list_elem elem;
+};
+
 struct thread
   {
     /* Owned by thread.c. */
@@ -104,6 +111,14 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
+
+    //Referencia al padre 
+
+    struct thread *parent;
+
+    //Lista de hijos con su status
+
+    struct list childs_with_status;
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */

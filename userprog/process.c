@@ -18,6 +18,7 @@
 #include "threads/malloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "lib/kernel/list.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -34,6 +35,8 @@ process_execute (const char *file_name)
   char *name;
   char *temp;
 
+  
+
   name = malloc(strlen(file_name) + 1);
   strlcpy(name, file_name, strlen(file_name)+1);
   name = strtok_r(name, " ", &temp);
@@ -47,8 +50,13 @@ process_execute (const char *file_name)
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
-  if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+  
+  //printf("REGRESE DE THREAD CREATE\n\n");
+
+  if (tid == TID_ERROR) {
+    
+    palloc_free_page (fn_copy);
+  } 
 
   free(name);
   return tid;
@@ -62,6 +70,8 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
+
+  
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -95,12 +105,47 @@ start_process (void *file_name_)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
-  while(1) {
+  /*while(1) {
     thread_yield();
+  }*/
+
+  //printf("ENTRE A PROCESS WAIT\n\n");
+
+  struct list *lista_tid_status = &(thread_current()->childs_with_status);
+
+  struct list_elem *elemento;
+
+  bool *finished_hijo = NULL;
+
+  int status_hijo;
+
+  for(elemento = list_begin(lista_tid_status); elemento != list_end(lista_tid_status); elemento = list_next(elemento)) {
+
+    struct tid_status *tid_status_actual = list_entry(elemento, struct tid_status, elem);
+
+    tid_t tid_actual = tid_status_actual->thread_id;
+
+    if(tid_actual == child_tid) {
+      finished_hijo = &(tid_status_actual->finished);
+      status_hijo = tid_status_actual->thread_status;
+      break;
+    }
+
   }
-  return -1;
+
+  if(finished_hijo != NULL) {
+
+    
+
+    while(!(*finished_hijo)) {
+      
+    }
+  
+  }
+
+  return status_hijo;
 }
 
 /* Free the current process's resources. */
@@ -231,6 +276,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   char *name;
   char *temp;
   char *real_name;
+
+  //printf("ENTRE A LOAD\n\n");
 
   name = malloc(strlen(file_name)+1);
   strlcpy(name, file_name, strlen(file_name)+1);
@@ -449,6 +496,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool
 setup_stack(void **esp, const char *file_name)
 {
+  
+
   uint8_t *kpage;
   bool success = false;
   char *args;
@@ -479,7 +528,7 @@ setup_stack(void **esp, const char *file_name)
     {
       *esp = PHYS_BASE;
 
-      printf("PHYS_BASE : %p\n\n", *esp);
+      //printf("PHYS_BASE : %p\n\n", *esp);
       
       for(int i = argn; i > 0; i--)
         {
@@ -488,7 +537,7 @@ setup_stack(void **esp, const char *file_name)
           *esp -= (strlen(arg) + 1);
           //AQUI ESTABA HACIENDO PRINTS PARA EL DEBUGGING DE STACK POINTER
           
-          printf("SP : %p\n\n", *esp);
+          //printf("SP : %p\n\n", *esp);
           
           strlcpy((char *)*esp, arg, strlen(arg) + 1);
 
@@ -518,15 +567,13 @@ setup_stack(void **esp, const char *file_name)
         }
 
        *esp -= sizeof(char**);
-       //arreglar estooo
 
        memcpy(*esp, &direccion_arreglo, sizeof(char **));
         
        *esp -= sizeof(int);
        memcpy(*esp, &argn, sizeof(int)); 
 
-       *esp -= sizeof(void *);
-       void *null_pointer = NULL;   
+       *esp -= sizeof(void *);   
        memset(*esp, 0 ,4);
 
        //hex_dump(0xbfffffc0, *esp, 75, true);

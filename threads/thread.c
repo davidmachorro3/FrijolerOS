@@ -17,6 +17,12 @@
 #include "userprog/process.h"
 #endif
 
+int block_count = 0;
+
+int yield_count = 0;
+
+int schedule_cnt = 0;
+
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -229,6 +235,7 @@ thread_create (const char *name, int priority,
 
   ASSERT (function != NULL);
 
+  
 
   /* Allocate thread. */
   t = palloc_get_page (PAL_ZERO);
@@ -273,11 +280,18 @@ thread_create (const char *name, int priority,
 void
 thread_block (void)
 {
+  block_count++;
+
   ASSERT (!intr_context ());
   ASSERT (intr_get_level () == INTR_OFF);
 
   thread_current ()->status = THREAD_BLOCKED;
+  //printf("BLOCK BEFORE SCHEDULE\n\n");
+
+  //ASSERT(block_count < 50);
+
   schedule ();
+
 }
 
 /* Transitions a blocked thread T to the ready-to-run state.
@@ -317,6 +331,8 @@ thread_name (void)
 struct thread *
 thread_current (void)
 {
+  //AQUI HAY CLAVOOOOOOOOOOOOO
+
   struct thread *t = running_thread ();
 
   /* Make sure T is really a thread.
@@ -363,6 +379,8 @@ thread_exit (void)
 void
 thread_yield (void)
 {
+  yield_count = yield_count + 1;
+
   struct thread *cur = thread_current ();
   enum intr_level old_level;
 
@@ -376,6 +394,10 @@ thread_yield (void)
     //list_reverse(&ready_list);
   }
   cur->status = THREAD_READY;
+  //printf("YIELD BEFORE SCHEDULE\n\n");
+
+  //ASSERT(yield_count < 200);
+
   schedule ();
   intr_set_level (old_level);
 }
@@ -563,6 +585,15 @@ init_thread (struct thread *t, const char *name, int priority)
   t->touched = 0;
   t->magic = THREAD_MAGIC;
 
+  //Inicializar lista de hijos
+  list_init(&(t->childs_with_status));
+  struct thread *rt = running_thread();
+  if(is_thread(rt) && (rt->status) == THREAD_RUNNING) {
+    t->parent = rt;
+  } else {
+    t->parent = NULL;
+  }
+
   list_init(&(t->old_priority_list));
   list_init(&(t->participating_locks));
 
@@ -643,7 +674,11 @@ thread_schedule_tail (struct thread *prev)
     {
       ASSERT (prev != cur);
       palloc_free_page (prev);
+
+      
     }
+
+    //printf("%p\n\n", prev);
 }
 
 /* Schedules a new process.  At entry, interrupts must be off and
@@ -672,6 +707,7 @@ schedule (void)
   if (cur != next)
     prev = switch_threads (cur, next);
   thread_schedule_tail (prev);
+  //printf("CUR : %p, NEXT : %p\n\n", cur, next);
 }
 
 /* Returns a tid to use for a new thread. */
